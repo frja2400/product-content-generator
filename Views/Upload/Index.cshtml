@@ -1,0 +1,22 @@
+// Tillfällig vy för att testa uppladdning av filer med testdata.
+
+@{
+    ViewData["Title"] = "Ladda upp";
+}
+
+<h2>Ladda upp produktfil</h2>
+
+<form method="post" action="/Upload/Upload" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".xlsx,.xml" />
+    <button type="submit">Importera</button>
+</form>
+
+@if (ViewBag.Count != null)
+{
+    <p>Importerade @ViewBag.Count produkter</p>
+
+    @foreach (var product in ViewBag.Products)
+    {
+        <p>@product.DisplayName – @product.Brand – @product.ImportSource</p>
+    }
+}
