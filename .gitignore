@@ -31,3 +31,6 @@ appsettings.*.json
 # === OS filer ===
 .DS_Store
 Thumbs.db
+
+# === Test data ===
+TestData/
