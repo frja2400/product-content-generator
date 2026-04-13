@@ -1,0 +1,33 @@
+# === .NET build ===
+bin/
+obj/
+
+# === Visual Studio / VS Code ===
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+
+# === Publicerings-/releasemappar ===
+publish/
+release/
+artifacts
+
+# === SQLite databaser ===
+*.db
+*.db-shm
+*.db-wal
+sqlite3.exe
+
+# === App settings / secrets ===
+appsettings.*.json
+!appsettings.json
+
+# === Logs ===
+*.log
+
+# === OS filer ===
+.DS_Store
+Thumbs.db
