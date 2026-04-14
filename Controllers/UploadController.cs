@@ -7,19 +7,19 @@ namespace ProductContentGenerator.Controllers;
 public class UploadController : Controller
 {
     private readonly ImportService _importService;
+    private readonly ClassificationService _classificationService;
 
-    public UploadController(ImportService importService)
+    public UploadController(ImportService importService, ClassificationService classificationService)
     {
         _importService = importService;
+        _classificationService = classificationService;
     }
 
-    // Visar uppladdningssidan
     public IActionResult Index()
     {
         return View();
     }
 
-    // Tar emot uppladdad fil och importerar produkter
     [HttpPost]
     public IActionResult Upload(IFormFile file)
     {
@@ -38,9 +38,15 @@ public class UploadController : Controller
         else
             return View("Index");
 
-        // Temporärt – visa resultatet direkt i vyn för testning
+        // Klassificera produkterna
+        _classificationService.ClassifyProducts(products);
+
+        // Räkna per kvalitetsnivå
         ViewBag.Count = products.Count;
-        ViewBag.Products = products.Take(5).ToList();
+        ViewBag.FullCount = products.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
+        ViewBag.LimitedCount = products.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Limited);
+        ViewBag.InsufficientCount = products.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Insufficient);
+        ViewBag.Products = products.Take(10).ToList();
 
         return View("Index");
     }

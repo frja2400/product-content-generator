@@ -1,4 +1,5 @@
 using ProductContentGenerator.Services;
+using ProductContentGenerator.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<ImportService>();
 builder.Services.AddScoped<ClassificationService>();
 builder.Services.AddScoped<ClaudeService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<SessionStore>();
 
 var app = builder.Build();
 

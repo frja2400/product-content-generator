@@ -14,9 +14,31 @@
 @if (ViewBag.Count != null)
 {
     <p>Importerade @ViewBag.Count produkter</p>
+    <p>
+        ● Fullständig: @ViewBag.FullCount &nbsp;
+        ● Begränsad: @ViewBag.LimitedCount &nbsp;
+        ● Otillräcklig: @ViewBag.InsufficientCount
+    </p>
 
-    @foreach (var product in ViewBag.Products)
-    {
-        <p>@product.DisplayName – @product.Brand – @product.ImportSource</p>
-    }
+    <table>
+        <thead>
+            <tr>
+                <th>Produktnamn</th>
+                <th>Varumärke</th>
+                <th>VariantId</th>
+                <th>Datakvalitet</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in ViewBag.Products)
+            {
+                <tr>
+                    <td>@product.DisplayName</td>
+                    <td>@product.Brand</td>
+                    <td>@product.VariantId</td>
+                    <td>@product.DataQuality</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
