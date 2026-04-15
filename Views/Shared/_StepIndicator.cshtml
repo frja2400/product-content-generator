@@ -1,0 +1,17 @@
+<div class="step-indicator">
+    <div class="step @(ViewData["Step"]?.ToString() == "1" ? "active" : "")">
+        <span class="step-number">1</span> Upload
+    </div>
+    <div class="step-line"></div>
+    <div class="step @(ViewData["Step"]?.ToString() == "2" ? "active" : "")">
+        <span class="step-number">2</span> Configure
+    </div>
+    <div class="step-line"></div>
+    <div class="step @(ViewData["Step"]?.ToString() == "3" ? "active" : "")">
+        <span class="step-number">3</span> Review
+    </div>
+    <div class="step-line"></div>
+    <div class="step @(ViewData["Step"]?.ToString() == "4" ? "active" : "")">
+        <span class="step-number">4</span> Export
+    </div>
+</div>

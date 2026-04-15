@@ -18,8 +18,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<ImportService>();
 builder.Services.AddScoped<ClassificationService>();
 builder.Services.AddScoped<ClaudeService>();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SessionStore>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

@@ -1,53 +1,75 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductContentGenerator.Services;
+using ProductContentGenerator.Data;
 
 namespace ProductContentGenerator.Controllers;
 
-// Tillfällig controller för att testa uppladdning av filer och import av produkter.
 public class UploadController : Controller
 {
     private readonly ImportService _importService;
     private readonly ClassificationService _classificationService;
+    private readonly SessionStore _sessionStore;
 
-    public UploadController(ImportService importService, ClassificationService classificationService)
+    public UploadController(ImportService importService, ClassificationService classificationService, SessionStore sessionStore)
     {
         _importService = importService;
         _classificationService = classificationService;
+        _sessionStore = sessionStore;
     }
 
     public IActionResult Index()
     {
+        Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
         return View();
     }
 
     [HttpPost]
     public IActionResult Upload(IFormFile file)
     {
+        // Ingen fil vald
         if (file == null || file.Length == 0)
-            return View("Index");
+        {
+            TempData["Error"] = "Please select a file to upload.";
+            return RedirectToAction("Index");
+        }
 
+        // Fel filformat
         var extension = Path.GetExtension(file.FileName).ToLower();
-        List<ProductContentGenerator.Models.Product> products;
+        if (extension != ".xlsx" && extension != ".xml")
+        {
+            TempData["Error"] = "Invalid file format. Please upload an XML or XLSX file.";
+            return RedirectToAction("Index");
+        }
 
-        using var stream = file.OpenReadStream();
+        try
+        {
+            List<ProductContentGenerator.Models.Product> products;
 
-        if (extension == ".xlsx")
-            products = _importService.ImportFromXlsx(stream);
-        else if (extension == ".xml")
-            products = _importService.ImportFromXml(stream);
-        else
-            return View("Index");
+            using var stream = file.OpenReadStream();
 
-        // Klassificera produkterna
-        _classificationService.ClassifyProducts(products);
+            if (extension == ".xlsx")
+                products = _importService.ImportFromXlsx(stream);
+            else
+                products = _importService.ImportFromXml(stream);
 
-        // Räkna per kvalitetsnivå
-        ViewBag.Count = products.Count;
-        ViewBag.FullCount = products.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
-        ViewBag.LimitedCount = products.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Limited);
-        ViewBag.InsufficientCount = products.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Insufficient);
-        ViewBag.Products = products.Take(10).ToList();
+            // Inga produkter hittades
+            if (products.Count == 0)
+            {
+                TempData["Error"] = "No products found in the file. Please check the file and try again.";
+                return RedirectToAction("Index");
+            }
 
-        return View("Index");
+            _classificationService.ClassifyProducts(products);
+            _sessionStore.SaveProducts(products);
+
+            return RedirectToAction("Index", "Configure");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Something went wrong while processing the file. Please check the file and try again.";
+            Console.WriteLine($"Upload error: {ex.Message}");
+            return RedirectToAction("Index");
+        }
     }
+
 }

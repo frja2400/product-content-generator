@@ -1,0 +1,38 @@
+@using ProductContentGenerator.Models
+@model List<ProductContentGenerator.Models.Product>
+    
+@{
+    ViewData["Title"] = "Configure";
+    ViewData["Step"] = "2";
+}
+
+<div style="padding: 40px;">
+    <h2>Imported products (@Model.Count)</h2>
+    <p>
+        🟢 Full: @Model.Count(p => p.DataQuality == DataQuality.Full) &nbsp;
+        🟡 Limited: @Model.Count(p => p.DataQuality == DataQuality.Limited) &nbsp;
+        🔴 Insufficient: @Model.Count(p => p.DataQuality == DataQuality.Insufficient)
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product name</th>
+                <th>Brand</th>
+                <th>Variant ID</th>
+                <th>Data quality</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.DisplayName</td>
+                    <td>@product.Brand</td>
+                    <td>@product.VariantId</td>
+                    <td>@product.DataQuality</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

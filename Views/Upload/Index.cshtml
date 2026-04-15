@@ -1,44 +1,25 @@
-// Tillfällig vy för att testa uppladdning av filer med testdata.
-
 @{
-    ViewData["Title"] = "Ladda upp";
+    ViewData["Title"] = "Upload";
+    ViewData["Step"] = "1";
 }
 
-<h2>Ladda upp produktfil</h2>
+<div class="upload-container">
+    <h1 class="upload-title">Product Content Generation</h1>
 
-<form method="post" action="/Upload/Upload" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".xlsx,.xml" />
-    <button type="submit">Importera</button>
-</form>
+    @if (TempData["Error"] != null)
+    {
+        <p class="upload-error">@TempData["Error"]</p>
+    }
 
-@if (ViewBag.Count != null)
-{
-    <p>Importerade @ViewBag.Count produkter</p>
-    <p>
-        ● Fullständig: @ViewBag.FullCount &nbsp;
-        ● Begränsad: @ViewBag.LimitedCount &nbsp;
-        ● Otillräcklig: @ViewBag.InsufficientCount
-    </p>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Produktnamn</th>
-                <th>Varumärke</th>
-                <th>VariantId</th>
-                <th>Datakvalitet</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in ViewBag.Products)
-            {
-                <tr>
-                    <td>@product.DisplayName</td>
-                    <td>@product.Brand</td>
-                    <td>@product.VariantId</td>
-                    <td>@product.DataQuality</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <form method="post" action="/Upload/Upload" enctype="multipart/form-data" id="uploadForm">
+        <div class="drop-zone" id="dropZone">
+            <input type="file" name="file" id="fileInput" accept=".xlsx,.xml" hidden />
+            <div class="drop-zone-content">
+                <i class="bi bi-cloud-arrow-up drop-zone-icon"></i>
+                <p class="drop-zone-text">Drag and drop XML / XLSX</p>
+                <p class="drop-zone-filename" id="fileName"></p>
+                <button type="button" class="btn-upload" id="uploadBtn">Upload file</button>
+            </div>
+        </div>
+    </form>
+</div>
