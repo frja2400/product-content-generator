@@ -1,0 +1,349 @@
+@model ProductContentGenerator.Models.Product
+
+<div class="detail-header">
+    <h3 class="detail-name">@Model.DisplayName</h3>
+    <span class="detail-variant">@Model.VariantId</span>
+    <span class="quality-dot @Model.DataQuality.ToString().ToLower()"></span>
+</div>
+
+<div class="detail-fields">
+
+    @* Identifiering *@
+    @if (!string.IsNullOrWhiteSpace(Model.GroupId) ||
+             !string.IsNullOrWhiteSpace(Model.EAN) ||
+             !string.IsNullOrWhiteSpace(Model.SearchProductId) ||
+             !string.IsNullOrWhiteSpace(Model.Brand))
+    {
+        <div class="detail-section">
+            <h4>Identification</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.Brand))
+            {
+                <div class="detail-field"><label>Brand</label>
+                    <p>@Model.Brand</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.EAN))
+            {
+                <div class="detail-field"><label>EAN</label>
+                    <p>@Model.EAN</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.GroupId))
+            {
+                <div class="detail-field"><label>Group ID</label>
+                    <p>@Model.GroupId</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.SearchProductId))
+            {
+                <div class="detail-field"><label>Search Product
+                    ID</label>
+                    <p>@Model.SearchProductId</p>
+                </div>
+            }
+        </div>
+    }
+
+    @* Beskrivningar *@
+    @if (!string.IsNullOrWhiteSpace(Model.ShortDescription) ||
+             !string.IsNullOrWhiteSpace(Model.LongDescription) ||
+             !string.IsNullOrWhiteSpace(Model.GroupLongDescription) ||
+             !string.IsNullOrWhiteSpace(Model.ContentDescription) ||
+             !string.IsNullOrWhiteSpace(Model.UsageDescription) ||
+             !string.IsNullOrWhiteSpace(Model.FeatureBullets) ||
+             !string.IsNullOrWhiteSpace(Model.AffectingSubstances))
+    {
+        <div class="detail-section">
+            <h4>Descriptions</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+            {
+                <div class="detail-field"><label>Short
+                    description</label>
+                    <p>@Model.ShortDescription</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.LongDescription))
+            {
+                <div class="detail-field"><label>Description</label>
+                    <p>@Model.LongDescription</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.GroupLongDescription))
+            {
+                <div class="detail-field"><label>Group
+                    description</label>
+                    <p>@Model.GroupLongDescription</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.ContentDescription))
+            {
+                <div class="detail-field"><label>Content</label>
+                    <p>@Model.ContentDescription</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.UsageDescription))
+            {
+                <div class="detail-field"><label>Usage</label>
+                    <p>@Model.UsageDescription</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.FeatureBullets))
+            {
+                <div class="detail-field"><label>Feature
+                    bullets</label>
+                    <p>@Model.FeatureBullets</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.AffectingSubstances))
+            {
+                <div class="detail-field"><label>Affecting
+                    substances</label>
+                    <p>@Model.AffectingSubstances</p>
+                </div>
+            }
+        </div>
+    }
+
+    @* Kategorisering *@
+    @if (!string.IsNullOrWhiteSpace(Model.Category0))
+    {
+        <div class="detail-section">
+            <h4>Categories</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.Category0))
+            {
+                <div class="detail-field"><label>Category 1</label>
+                    <p>@Model.Category0</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Category1))
+            {
+                <div class="detail-field"><label>Category 2</label>
+                    <p>@Model.Category1</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Category2))
+            {
+                <div class="detail-field"><label>Category 3</label>
+                    <p>@Model.Category2</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Category3))
+            {
+                <div class="detail-field"><label>Category 4</label>
+                    <p>@Model.Category3</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Category4))
+            {
+                <div class="detail-field"><label>Category 5</label>
+                    <p>@Model.Category4</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Category5))
+            {
+                <div class="detail-field"><label>Category 6</label>
+                    <p>@Model.Category5</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.ProductClass))
+            {
+                <div class="detail-field"><label>Product class</label>
+                    <p>@Model.ProductClass</p>
+                </div>
+            }
+        </div>
+    }
+
+    @* Attribut *@
+    @if (!string.IsNullOrWhiteSpace(Model.Strength) ||
+             !string.IsNullOrWhiteSpace(Model.Form) ||
+             !string.IsNullOrWhiteSpace(Model.PackSize) ||
+             !string.IsNullOrWhiteSpace(Model.Beredningsform) ||
+             !string.IsNullOrWhiteSpace(Model.Egenskaper) ||
+             !string.IsNullOrWhiteSpace(Model.Ursprungsland) ||
+             !string.IsNullOrWhiteSpace(Model.Solskyddsfaktor) ||
+             !string.IsNullOrWhiteSpace(Model.ItemGroup) ||
+             !string.IsNullOrWhiteSpace(Model.Alder) ||
+             !string.IsNullOrWhiteSpace(Model.BarnVuxen) ||
+             !string.IsNullOrWhiteSpace(Model.Hudtyp) ||
+             !string.IsNullOrWhiteSpace(Model.Hartyp) ||
+             !string.IsNullOrWhiteSpace(Model.Farg))
+    {
+        <div class="detail-section">
+            <h4>Attributes</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.Strength))
+            {
+                <div class="detail-field"><label>Strength</label>
+                    <p>@Model.Strength</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Form))
+            {
+                <div class="detail-field"><label>Form</label>
+                    <p>@Model.Form</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.PackSize))
+            {
+                <div class="detail-field"><label>Pack size</label>
+                    <p>@Model.PackSize</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Beredningsform))
+            {
+                <div class="detail-field"><label>Beredningsform</label>
+                    <p>@Model.Beredningsform</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Egenskaper))
+            {
+                <div class="detail-field"><label>Egenskaper</label>
+                    <p>@Model.Egenskaper</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Ursprungsland))
+            {
+                <div class="detail-field"><label>Origin</label>
+                    <p>@Model.Ursprungsland</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Solskyddsfaktor))
+            {
+                <div class="detail-field"><label>SPF</label>
+                    <p>@Model.Solskyddsfaktor</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.ItemGroup))
+            {
+                <div class="detail-field"><label>Item group</label>
+                    <p>@Model.ItemGroup</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Alder))
+            {
+                <div class="detail-field"><label>Age</label>
+                    <p>@Model.Alder</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.BarnVuxen))
+            {
+                <div class="detail-field"><label>Child/Adult</label>
+                    <p>@Model.BarnVuxen</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Hudtyp))
+            {
+                <div class="detail-field"><label>Skin type</label>
+                    <p>@Model.Hudtyp</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Hartyp))
+            {
+                <div class="detail-field"><label>Hair type</label>
+                    <p>@Model.Hartyp</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Farg))
+            {
+                <div class="detail-field"><label>Color</label>
+                    <p>@Model.Farg</p>
+                </div>
+            }
+        </div>
+    }
+
+    @* Varianter *@
+    @if (!string.IsNullOrWhiteSpace(Model.Variant1) ||
+             !string.IsNullOrWhiteSpace(Model.VariantStorlek) ||
+             !string.IsNullOrWhiteSpace(Model.VariantDoft) ||
+             !string.IsNullOrWhiteSpace(Model.VariantSmak))
+    {
+        <div class="detail-section">
+            <h4>Variants</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.Variant1))
+            {
+                <div class="detail-field"><label>Variant 1</label>
+                    <p>@Model.Variant1</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Variant2))
+            {
+                <div class="detail-field"><label>Variant 2</label>
+                    <p>@Model.Variant2</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.VariantStorlek))
+            {
+                <div class="detail-field"><label>Size</label>
+                    <p>@Model.VariantStorlek</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.VariantDoft))
+            {
+                <div class="detail-field"><label>Scent</label>
+                    <p>@Model.VariantDoft</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.VariantSmak))
+            {
+                <div class="detail-field"><label>Flavor</label>
+                    <p>@Model.VariantSmak</p>
+                </div>
+            }
+        </div>
+    }
+
+    @* Djurattribut *@
+    @if (!string.IsNullOrWhiteSpace(Model.Djurslag) ||
+             !string.IsNullOrWhiteSpace(Model.Fodertyp) ||
+             !string.IsNullOrWhiteSpace(Model.DjurAlder) ||
+             !string.IsNullOrWhiteSpace(Model.DjurStorlek))
+    {
+        <div class="detail-section">
+            <h4>Animal attributes</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.Djurslag))
+            {
+                <div class="detail-field"><label>Animal type</label>
+                    <p>@Model.Djurslag</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Fodertyp))
+            {
+                <div class="detail-field"><label>Feed type</label>
+                    <p>@Model.Fodertyp</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.DjurAlder))
+            {
+                <div class="detail-field"><label>Animal age</label>
+                    <p>@Model.DjurAlder</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.DjurStorlek))
+            {
+                <div class="detail-field"><label>Animal size</label>
+                    <p>@Model.DjurStorlek</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Hundras))
+            {
+                <div class="detail-field"><label>Dog breed</label>
+                    <p>@Model.Hundras</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Kattras))
+            {
+                <div class="detail-field"><label>Cat breed</label>
+                    <p>@Model.Kattras</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.DjurKostbehov))
+            {
+                <div class="detail-field"><label>Dietary needs</label>
+                    <p>@Model.DjurKostbehov</p>
+                </div>
+            }
+        </div>
+    }
+
+</div>

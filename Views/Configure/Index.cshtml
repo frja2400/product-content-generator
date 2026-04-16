@@ -1,38 +1,79 @@
-@using ProductContentGenerator.Models
 @model List<ProductContentGenerator.Models.Product>
-    
 @{
     ViewData["Title"] = "Configure";
     ViewData["Step"] = "2";
+
+    var brands = Model.Select(p => p.Brand).Where(b => !string.IsNullOrEmpty(b)).Distinct().OrderBy(b => b).ToList();
+    var categories = Model.Select(p => p.Category0).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c =>
+c).ToList();
+
+    var fullCount = Model.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
+    var limitedCount = Model.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Limited);
+    var insufficientCount = Model.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Insufficient);
 }
 
-<div style="padding: 40px;">
-    <h2>Imported products (@Model.Count)</h2>
-    <p>
-        🟢 Full: @Model.Count(p => p.DataQuality == DataQuality.Full) &nbsp;
-        🟡 Limited: @Model.Count(p => p.DataQuality == DataQuality.Limited) &nbsp;
-        🔴 Insufficient: @Model.Count(p => p.DataQuality == DataQuality.Insufficient)
-    </p>
+<div class="configure-layout">
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product name</th>
-                <th>Brand</th>
-                <th>Variant ID</th>
-                <th>Data quality</th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Vänster panel -->
+    <div class="configure-left">
+        <div class="configure-header">
+            <h2 class="configure-title">Imported products <span class="configure-count">(@Model.Count)</span></h2>
+            <div class="quality-summary">
+                <span class="quality-badge" onclick="sortByQuality('full')">
+                    <span class="quality-dot full"></span> Full (@fullCount)
+                </span>
+                <span class="quality-badge" onclick="sortByQuality('limited')">
+                    <span class="quality-dot limited"></span> Limited (@limitedCount)
+                </span>
+                <span class="quality-badge" onclick="sortByQuality('insufficient')">
+                    <span class="quality-dot insufficient"></span> Insufficient (@insufficientCount)
+                </span>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="filter-section">
+            <select id="brandFilter" class="form-select filter-select">
+                <option value="">Brand</option>
+                @foreach (var brand in brands)
+                {
+                    <option value="@brand">@brand</option>
+                }
+            </select>
+
+            <select id="categoryFilter" class="form-select filter-select">
+                <option value="">Category</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+
+            <div id="activeTags" class="active-tags"></div>
+
+            <p class="selected-count"><span id="selectedCount">@Model.Count</span> of @Model.Count products selected</p>
+        </div>
+
+        <!-- Produktlista -->
+        <div class="product-list" id="productList">
             @foreach (var product in Model)
             {
-                <tr>
-                    <td>@product.DisplayName</td>
-                    <td>@product.Brand</td>
-                    <td>@product.VariantId</td>
-                    <td>@product.DataQuality</td>
-                </tr>
+                <div class="product-item" data-variant-id="@product.VariantId" data-brand="@product.Brand"
+                     data-category="@product.Category0" data-quality="@product.DataQuality">
+                    <input type="checkbox" class="product-checkbox" checked />
+                    <div class="product-info" onclick="loadDetail('@product.VariantId', this.closest('.product-item'))">
+                        <span class="product-name">@product.DisplayName</span>
+                        <span class="product-variant">@product.VariantId</span>
+                    </div>
+                    <span class="quality-dot @product.DataQuality.ToString().ToLower()"></span>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
+
+    <!-- Höger panel -->
+    <div class="configure-right" id="detailPanel">
+        <p class="detail-placeholder">Select a product to view details</p>
+    </div>
+
 </div>
