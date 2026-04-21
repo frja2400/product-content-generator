@@ -3,9 +3,40 @@
     ViewData["Title"] = "Configure";
     ViewData["Step"] = "2";
 
-    var brands = Model.Select(p => p.Brand).Where(b => !string.IsNullOrEmpty(b)).Distinct().OrderBy(b => b).ToList();
-    var categories = Model.Select(p => p.Category0).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c =>
-c).ToList();
+    var brands = Model.Select(p => p.Brand).Where(b => !string.IsNullOrEmpty(b)).Select(b => b!).Distinct().OrderBy(b =>
+b).ToList();
+
+    // Hitta den första kategorinivån med variation
+    var cat0Values = Model.Select(p => p.Category0).Where(c => !string.IsNullOrEmpty(c)).Select(c =>
+c!).Distinct().ToList();
+    var cat1Values = Model.Select(p => p.Category1).Where(c => !string.IsNullOrEmpty(c)).Select(c =>
+c!).Distinct().ToList();
+    var cat2Values = Model.Select(p => p.Category2).Where(c => !string.IsNullOrEmpty(c)).Select(c =>
+c!).Distinct().ToList();
+
+    List<string> categories;
+    string categoryDataKey;
+
+    if (cat0Values.Count > 1)
+    {
+        categories = cat0Values.OrderBy(c => c).ToList();
+        categoryDataKey = "category0";
+    }
+    else if (cat1Values.Count > 1)
+    {
+        categories = cat1Values.OrderBy(c => c).ToList();
+        categoryDataKey = "category1";
+    }
+    else if (cat2Values.Count > 1)
+    {
+        categories = cat2Values.OrderBy(c => c).ToList();
+        categoryDataKey = "category2";
+    }
+    else
+    {
+        categories = cat0Values.OrderBy(c => c).ToList();
+        categoryDataKey = "category0";
+    }
 
     var fullCount = Model.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
     var limitedCount = Model.Count(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Limited);
@@ -41,7 +72,7 @@ c).ToList();
                 }
             </select>
 
-            <select id="categoryFilter" class="form-select filter-select">
+            <select id="categoryFilter" class="form-select filter-select" data-category-key="@categoryDataKey">
                 <option value="">Category</option>
                 @foreach (var category in categories)
                 {
@@ -59,7 +90,8 @@ c).ToList();
             @foreach (var product in Model)
             {
                 <div class="product-item" data-variant-id="@product.VariantId" data-brand="@product.Brand"
-                     data-category="@product.Category0" data-quality="@product.DataQuality">
+                     data-category0="@product.Category0" data-category1="@product.Category1"
+                     data-category2="@product.Category2" data-quality="@product.DataQuality">
                     <input type="checkbox" class="product-checkbox" checked />
                     <div class="product-info" onclick="loadDetail('@product.VariantId', this.closest('.product-item'))">
                         <span class="product-name">@product.DisplayName</span>
