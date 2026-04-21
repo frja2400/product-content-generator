@@ -194,4 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectedCountEl) selectedCountEl.textContent = count;
         });
     });
+
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to cancel? All imported products will be lost.')) {
+                window.location.href = '/Upload';
+            }
+        });
+    }
 });

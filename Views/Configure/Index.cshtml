@@ -103,9 +103,21 @@ c!).Distinct().ToList();
         </div>
     </div>
 
-    <!-- Höger panel -->
-    <div class="configure-right" id="detailPanel">
+    <!-- Mitten panel -->
+    <div class="configure-middle" id="detailPanel">
         <p class="detail-placeholder">Select a product to view details</p>
     </div>
 
+    <!-- Höger panel -->
+    <div class="configure-right">
+        <p class="prompt-label">AI Instructions</p>
+        <textarea class="prompt-textarea" id="promptInput"
+                  placeholder="Write your prompt instructions here..."></textarea>
+        <p class="prompt-hint">Adjust prompt if needed</p>
+        <div class="prompt-actions">
+            <input type="number" class="sample-input" id="sampleCount" value="3" min="3" max="10" />
+            <button class="btn-sample" id="sampleBtn">Run sample</button>
+        </div>
+        <button class="btn-cancel" id="cancelBtn">Cancel import</button>
+    </div>
 </div>
