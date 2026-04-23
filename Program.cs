@@ -17,7 +17,7 @@ builder.Services.AddSession(options =>
 // Registrera services
 builder.Services.AddScoped<ImportService>();
 builder.Services.AddScoped<ClassificationService>();
-builder.Services.AddScoped<ClaudeService>();
+builder.Services.AddHttpClient<ClaudeService>();
 builder.Services.AddScoped<SessionStore>();
 builder.Services.AddHttpContextAccessor();
 

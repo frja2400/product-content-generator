@@ -68,6 +68,17 @@ function sortByQuality(quality) {
     items.forEach(item => list.appendChild(item));
 }
 
+// Inaktivera Run sample om inga produkter är valda
+function updateSampleButton() {
+    const sampleBtn = document.getElementById('sampleBtn');
+    if (!sampleBtn) return;
+
+    const checkedCount = document.querySelectorAll('.product-checkbox:checked').length;
+    sampleBtn.disabled = checkedCount === 0;
+    sampleBtn.style.opacity = checkedCount === 0 ? '0.4' : '1';
+    sampleBtn.style.cursor = checkedCount === 0 ? 'not-allowed' : 'pointer';
+}
+
 // Configure - filter, checkbox och sortering
 document.addEventListener('DOMContentLoaded', () => {
     const brandFilter = document.getElementById('brandFilter');
@@ -109,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedCountEl) selectedCountEl.textContent = selectedCount;
 
         updateCategoryDropdown();
+        updateSampleButton();
     }
 
     function renderTags() {
@@ -146,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryKey = categoryFilter.dataset.categoryKey || 'category0';
         const currentValue = categoryFilter.value;
 
-        // Hitta vilka kategorier som finns bland synliga produkter
         const visibleCategories = new Set();
         productItems.forEach(item => {
             if (item.style.display !== 'none') {
@@ -155,13 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Uppdatera dropdown-alternativen
         const options = categoryFilter.querySelectorAll('option:not([value=""])');
         options.forEach(option => {
             option.style.display = visibleCategories.has(option.value) ? '' : 'none';
         });
 
-        // Återställ värdet om det inte längre är synligt
         if (!visibleCategories.has(currentValue)) {
             categoryFilter.value = '';
         }
@@ -192,16 +201,19 @@ document.addEventListener('DOMContentLoaded', () => {
         checkbox.querySelector('.product-checkbox')?.addEventListener('change', () => {
             const count = document.querySelectorAll('.product-checkbox:checked').length;
             if (selectedCountEl) selectedCountEl.textContent = count;
+            updateSampleButton();
         });
     });
 
-    const cancelBtn = document.getElementById('cancelBtn');
+    // Anropa vid sidladdning
+    updateSampleButton();
+});
 
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to cancel? All imported products will be lost.')) {
-                window.location.href = '/Upload';
-            }
-        });
-    }
+// Cancel import
+document.querySelectorAll('.cancel-import-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to cancel? All progress will be lost.')) {
+            window.location.href = '/Upload';
+        }
+    });
 });

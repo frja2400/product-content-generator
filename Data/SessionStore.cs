@@ -36,4 +36,20 @@ public class SessionStore
     {
         _httpContextAccessor.HttpContext?.Session.Remove(ProductsKey);
     }
+
+    private const string PromptKey = "prompt";
+
+    // Sparar prompten i sessionen
+    public void SavePrompt(string prompt)
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        session?.SetString(PromptKey, prompt);
+    }
+
+    // Hämtar prompten från sessionen
+    public string GetPrompt()
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        return session?.GetString(PromptKey) ?? string.Empty;
+    }
 }

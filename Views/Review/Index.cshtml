@@ -1,0 +1,152 @@
+@model List<ProductContentGenerator.Models.Product>
+@using Microsoft.AspNetCore.Html
+@{
+    ViewData["Title"] = "Review";
+    ViewData["Step"] = "3";
+
+    var generatedProducts = Model.Where(p => p.GeneratedDescription != null).ToList();
+}
+
+<div class="review-layout">
+
+    <!-- Vänster panel – produktkort -->
+    <div class="review-left">
+        @foreach (var product in generatedProducts)
+        {
+            <div class="product-card">
+                <div class="product-card-header">
+                    <div class="product-card-title">
+                        <h3 class="card-name">@product.DisplayName</h3>
+                        <span class="card-variant">@product.VariantId</span>
+                    </div>
+                    <span class="quality-dot @product.DataQuality.ToString().ToLower()"></span>
+                </div>
+
+                <div class="card-generated">
+                    <h4 class="card-section-label">Generated description</h4>
+                    <div class="card-text">@Html.Raw(RenderMarkdown(product.GeneratedDescription ?? ""))</div>
+                </div>
+
+                <details class="card-original">
+                    <summary>Original data</summary>
+                    <div class="card-original-content">
+                        @if (!string.IsNullOrWhiteSpace(product.LongDescription))
+                        {
+                            <div class="original-field">
+                                <label>Description</label>
+                                <p>@product.LongDescription</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(product.ShortDescription))
+                        {
+                            <div class="original-field">
+                                <label>Short description</label>
+                                <p>@product.ShortDescription</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(product.ContentDescription))
+                        {
+                            <div class="original-field">
+                                <label>Content</label>
+                                <p>@product.ContentDescription</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(product.UsageDescription))
+                        {
+                            <div class="original-field">
+                                <label>Usage</label>
+                                <p>@product.UsageDescription</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(product.FeatureBullets))
+                        {
+                            <div class="original-field">
+                                <label>Feature bullets</label>
+                                <p>@product.FeatureBullets</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(product.AffectingSubstances))
+                        {
+                            <div class="original-field">
+                                <label>Affecting substances</label>
+                                <p>@product.AffectingSubstances</p>
+                            </div>
+                        }
+                        @if (string.IsNullOrWhiteSpace(product.LongDescription) &&
+                                                                                     string.IsNullOrWhiteSpace(product.ShortDescription) &&
+                                                                                     string.IsNullOrWhiteSpace(product.ContentDescription) &&
+                                                                                     string.IsNullOrWhiteSpace(product.UsageDescription) &&
+                                                                                     string.IsNullOrWhiteSpace(product.FeatureBullets) &&
+                                                                                     string.IsNullOrWhiteSpace(product.AffectingSubstances))
+                        {
+                            <p class="card-no-data">No original description available.</p>
+                        }
+                    </div>
+                </details>
+
+                @if (product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited)
+                {
+                    <p class="card-warning">Generated from limited data – review carefully.</p>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Höger panel – prompt och åtgärder -->
+    <div class="review-right">
+        <form method="post" action="/Configure/RunSample" id="rerunForm">
+            <p class="prompt-label">AI Instructions</p>
+            <textarea class="prompt-textarea" name="prompt">@ViewBag.Prompt</textarea>
+            <p class="prompt-hint">Adjust prompt if needed</p>
+            <div class="prompt-actions">
+                <input type="number" class="sample-input" name="sampleCount" value="3" min="3" max="10" />
+                <span class="sample-label">sample products</span>
+            </div>
+        </form>
+
+        <div class="review-actions">
+            <button type="submit" form="rerunForm" class="btn-sample">Run sample again</button>
+            <button class="btn-run-all" id="runAllBtn">Run all products (@Model.Count(p => p.DataQuality !=
+                                ProductContentGenerator.Models.DataQuality.Insufficient))</button>
+                <div class="review-secondary-actions">
+                    <a href="/Configure" class="btn-text-link">Back to configure</a>
+                    <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
+                </div>
+            </div>
+        </div>
+
+@functions {
+    string RenderMarkdown(string markdown)
+    {
+        if (string.IsNullOrEmpty(markdown)) return "";
+        
+        // Enkel markdown-rendering
+        var html = markdown
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;");
+
+        // Rubriker
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"^### (.+)$", "<h4>$1</h4>",
+System.Text.RegularExpressions.RegexOptions.Multiline);
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"^## (.+)$", "<h3>$1</h3>",
+System.Text.RegularExpressions.RegexOptions.Multiline);
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"^# (.+)$", "<h2>$1</h2>",
+System.Text.RegularExpressions.RegexOptions.Multiline);
+
+        // Fetstil
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+
+        // Punktlistor
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"^- (.+)$", "<li>$1</li>",
+System.Text.RegularExpressions.RegexOptions.Multiline);
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"(<li>.*</li>)", "<ul>$1</ul>",
+System.Text.RegularExpressions.RegexOptions.Singleline);
+
+        // Radbrytningar
+        html = html.Replace("\n\n", "</p><p>").Replace("\n", "<br/>");
+        html = "<p>" + html + "</p>";
+
+        return html;
+    }
+}
