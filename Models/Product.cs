@@ -99,4 +99,7 @@ public class Product
     // Klassificering (internt, exporteras ej)
     public DataQuality DataQuality { get; set; }
     public string? ImportSource { get; set; }
+
+    // Internt – om genereringen misslyckades och fallback användes
+    public bool GenerationFailed { get; set; }
 }

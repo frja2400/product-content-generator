@@ -217,3 +217,34 @@ document.querySelectorAll('.cancel-import-btn').forEach(btn => {
         }
     });
 });
+
+// Try again per produkt
+document.querySelectorAll('.btn-retry').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const variantId = btn.dataset.variantId;
+        btn.textContent = 'Generating...';
+        btn.disabled = true;
+
+        const response = await fetch(`/Review/RetryGeneration?variantId=${encodeURIComponent(variantId)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+        const card = btn.closest('.product-card');
+
+        // Uppdatera genererad text
+        const cardText = card.querySelector('.card-text');
+        if (cardText) cardText.innerHTML = result.generatedDescription.replace(/\n/g, '<br>');
+
+        // Ta bort felmeddelande och knapp om det lyckades
+        if (result.success) {
+            const errorMsg = card.querySelector('.card-error');
+            if (errorMsg) errorMsg.remove();
+            btn.remove();
+        } else {
+            btn.textContent = 'Try again';
+            btn.disabled = false;
+        }
+    });
+});

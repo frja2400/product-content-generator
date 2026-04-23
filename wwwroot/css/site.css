@@ -177,6 +177,7 @@ body {
     flex-direction: column;
     padding: 24px;
     gap: 12px;
+    overflow-y: auto;
 }
 
 .prompt-label {
@@ -239,7 +240,7 @@ body {
     flex: 1;
     background-color: white;
     color: var(--color-primary);
-    border: 2px solid var(--color-primary);
+    border: 1px solid var(--color-primary);
     border-radius: 6px;
     padding: 8px 20px;
     font-size: 13px;
@@ -534,6 +535,7 @@ body {
     flex-direction: column;
     padding: 24px;
     gap: 12px;
+    overflow-y: auto;
 }
 
 .review-actions {
@@ -654,6 +656,7 @@ body {
 .card-warning {
     margin-top: 12px;
     font-size: 12px;
+    font-weight: 600;
     color: #ff9800;
 }
 
@@ -661,7 +664,7 @@ body {
 .btn-run-all {
     background-color: white;
     color: var(--color-primary);
-    border: 2px solid var(--color-primary);
+    border: 1px solid var(--color-primary);
     border-radius: 6px;
     padding: 8px 20px;
     font-size: 13px;
@@ -689,4 +692,22 @@ body {
     color: #222;
     margin: 0;
     line-height: 1.6;
+}
+
+.card-error {
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #f44336;
+}
+
+.btn-retry {
+    background: none;
+    border: 1px solid #f44336;
+    color: #f44336;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 6px;
 }

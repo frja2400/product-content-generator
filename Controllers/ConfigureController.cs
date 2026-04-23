@@ -78,11 +78,11 @@ public class ConfigureController : Controller
         {
             var result = await _claudeService.GenerateDescriptionAsync(product, prompt);
 
-            // Uppdatera produkten i listan med genererad text
             var productInSession = products.First(p => p.VariantId == product.VariantId);
             productInSession.GeneratedDescription = result.Success
                 ? result.GeneratedDescription
                 : product.LongDescription;
+            productInSession.GenerationFailed = !result.Success;
         }
 
         // Spara uppdaterad produktlista i sessionen

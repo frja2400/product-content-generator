@@ -27,6 +27,17 @@
                     <div class="card-text">@Html.Raw(RenderMarkdown(product.GeneratedDescription ?? ""))</div>
                 </div>
 
+                @if (product.GenerationFailed)
+                {
+                    <p class="card-error">Generation failed – showing original text.</p>
+                    <button class="btn-retry" data-variant-id="@product.VariantId">Try again</button>
+                }
+
+                @if (product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited)
+                {
+                    <p class="card-warning">Generated from limited data – review carefully.</p>
+                }
+
                 <details class="card-original">
                     <summary>Original data</summary>
                     <div class="card-original-content">
@@ -73,11 +84,11 @@
                             </div>
                         }
                         @if (string.IsNullOrWhiteSpace(product.LongDescription) &&
-                                                                                     string.IsNullOrWhiteSpace(product.ShortDescription) &&
-                                                                                     string.IsNullOrWhiteSpace(product.ContentDescription) &&
-                                                                                     string.IsNullOrWhiteSpace(product.UsageDescription) &&
-                                                                                     string.IsNullOrWhiteSpace(product.FeatureBullets) &&
-                                                                                     string.IsNullOrWhiteSpace(product.AffectingSubstances))
+                                                                                                             string.IsNullOrWhiteSpace(product.ShortDescription) &&
+                                                                                                             string.IsNullOrWhiteSpace(product.ContentDescription) &&
+                                                                                                             string.IsNullOrWhiteSpace(product.UsageDescription) &&
+                                                                                                             string.IsNullOrWhiteSpace(product.FeatureBullets) &&
+                                                                                                             string.IsNullOrWhiteSpace(product.AffectingSubstances))
                         {
                             <p class="card-no-data">No original description available.</p>
                         }
@@ -107,7 +118,7 @@
         <div class="review-actions">
             <button type="submit" form="rerunForm" class="btn-sample">Run sample again</button>
             <button class="btn-run-all" id="runAllBtn">Run all products (@Model.Count(p => p.DataQuality !=
-                                ProductContentGenerator.Models.DataQuality.Insufficient))</button>
+                                                ProductContentGenerator.Models.DataQuality.Insufficient))</button>
                 <div class="review-secondary-actions">
                     <a href="/Configure" class="btn-text-link">Back to configure</a>
                     <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
