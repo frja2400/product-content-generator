@@ -207,6 +207,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Anropa vid sidladdning
     updateSampleButton();
+
+    // Fyll i valda produkter och visa laddningsindikator vid submit
+    document.getElementById('sampleForm')?.addEventListener('submit', () => {
+        const container = document.getElementById('selectedProductInputs');
+        if (container) {
+            container.innerHTML = '';
+            document.querySelectorAll('.product-checkbox:checked').forEach(cb => {
+                const variantId = cb.closest('.product-item').dataset.variantId;
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selectedVariantIds';
+                input.value = variantId;
+                container.appendChild(input);
+            });
+        }
+
+        const sampleBtn = document.getElementById('sampleBtn');
+        if (sampleBtn) {
+            sampleBtn.disabled = true;
+            sampleBtn.textContent = 'Generating...';
+        }
+    });
 });
 
 // Cancel import
@@ -233,11 +255,9 @@ document.querySelectorAll('.btn-retry').forEach(btn => {
         const result = await response.json();
         const card = btn.closest('.product-card');
 
-        // Uppdatera genererad text
         const cardText = card.querySelector('.card-text');
         if (cardText) cardText.innerHTML = result.generatedDescription.replace(/\n/g, '<br>');
 
-        // Ta bort felmeddelande och knapp om det lyckades
         if (result.success) {
             const errorMsg = card.querySelector('.card-error');
             if (errorMsg) errorMsg.remove();
@@ -248,3 +268,37 @@ document.querySelectorAll('.btn-retry').forEach(btn => {
         }
     });
 });
+
+// Export - ladda produktdetalj
+function loadExportDetail(variantId, item) {
+    document.querySelectorAll('.product-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    fetch(`/Export/Detail?variantId=${encodeURIComponent(variantId)}`)
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('exportDetailPanel').innerHTML = html;
+        });
+}
+
+// Progress polling
+const progressText = document.getElementById('progressText');
+const progressBar = document.getElementById('progressBar');
+
+if (progressText && progressBar) {
+    const poll = setInterval(async () => {
+        const response = await fetch('/Configure/GetProgress');
+        const data = await response.json();
+
+        if (data.total > 0) {
+            const percent = Math.round((data.completed / data.total) * 100);
+            progressText.textContent = `${data.completed} of ${data.total} products generated`;
+            progressBar.style.width = `${percent}%`;
+        }
+
+        if (data.done) {
+            clearInterval(poll);
+            window.location.href = '/Export';
+        }
+    }, 2000);
+}

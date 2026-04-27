@@ -1,0 +1,96 @@
+@model List<ProductContentGenerator.Models.Product>
+@{
+    ViewData["Title"] = "Export";
+    ViewData["Step"] = "4";
+
+    var selectedVariantIds = (List<string>)(ViewBag.SelectedVariantIds ?? new List<string>());
+
+    var exportProducts = Model
+        .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") &&
+                    p.DataQuality != ProductContentGenerator.Models.DataQuality.Insufficient)
+        .ToList();
+
+    var insufficientProducts = Model
+        .Where(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Insufficient)
+        .ToList();
+
+    var fullCount = exportProducts.Count(p => !p.GenerationFailed && !string.IsNullOrWhiteSpace(p.GeneratedDescription) &&
+p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
+    var limitedCount = exportProducts.Count(p => !p.GenerationFailed && !string.IsNullOrWhiteSpace(p.GeneratedDescription)
+&& p.DataQuality == ProductContentGenerator.Models.DataQuality.Limited);
+    var originalCount = exportProducts.Count(p => p.GenerationFailed || string.IsNullOrWhiteSpace(p.GeneratedDescription));
+}
+
+<div class="export-layout">
+
+    <!-- Vänster panel – produktlista -->
+    <div class="export-left">
+        <div class="configure-header">
+            <h2 class="configure-title">Generated products <span class="configure-count">(@exportProducts.Count)</span>
+            </h2>
+            <div class="quality-summary">
+                <span class="quality-badge">
+                    <span class="quality-dot full"></span> Full (@fullCount)
+                </span>
+                <span class="quality-badge">
+                    <span class="quality-dot limited"></span> Limited (@limitedCount)
+                </span>
+                <span class="quality-badge">
+                    <span class="quality-dot original"></span> Original (@originalCount)
+                </span>
+            </div>
+        </div>
+
+        <div class="product-list">
+            @foreach (var product in exportProducts)
+            {
+                var dotClass = product.GenerationFailed || string.IsNullOrWhiteSpace(product.GeneratedDescription) ?
+            "original" :
+               product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited ? "limited" : "full";
+
+                <div class="product-item" data-variant-id="@product.VariantId"
+                     onclick="loadExportDetail('@product.VariantId', this)">
+                    <div class="product-info">
+                        <span class="product-name">@product.DisplayName</span>
+                        <span class="product-variant">@product.VariantId</span>
+                    </div>
+                    <span class="quality-dot @dotClass"></span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Mitten panel – detaljvy -->
+    <div class="export-middle" id="exportDetailPanel">
+        <p class="detail-placeholder">Select a product to view details</p>
+    </div>
+
+    <!-- Höger panel – otillräckliga produkter och export -->
+    <div class="export-right">
+        @if (insufficientProducts.Any())
+        {
+            <div class="insufficient-section">
+                <p class="insufficient-title">Not exported <span
+                    class="configure-count">(@insufficientProducts.Count)</span></p>
+                    <p class="insufficient-description">These products have insufficient data and will not be included in the
+                        export.</p>
+                        <div class="insufficient-list">
+                            @foreach (var product in insufficientProducts)
+                            {
+                                <div class="insufficient-item">
+                                    <span class="product-name">@product.DisplayName</span>
+                                    <span class="product-variant">@product.VariantId</span>
+                                    <span class="quality-dot insufficient"></span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <button class="btn-export" id="exportBtn">Export to Excel</button>
+                <div class="review-secondary-actions">
+                    <a href="/Review" class="btn-text-link">Back to review</a>
+                    <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
+                </div>
+
+            </div>

@@ -52,4 +52,47 @@ public class SessionStore
         var session = _httpContextAccessor.HttpContext?.Session;
         return session?.GetString(PromptKey) ?? string.Empty;
     }
+
+    private const string ProgressKey = "progress";
+
+    public void SaveProgress(int completed, int total)
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        var progress = new { completed, total };
+        session?.SetString(ProgressKey, JsonSerializer.Serialize(progress));
+    }
+
+    public (int completed, int total) GetProgress()
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        var json = session?.GetString(ProgressKey);
+        if (string.IsNullOrEmpty(json)) return (0, 0);
+
+        var progress = JsonSerializer.Deserialize<JsonElement>(json);
+        return (progress.GetProperty("completed").GetInt32(),
+                progress.GetProperty("total").GetInt32());
+    }
+
+    public void ClearProgress()
+    {
+        _httpContextAccessor.HttpContext?.Session.Remove(ProgressKey);
+    }
+
+    private const string SelectedKey = "selected";
+
+    // Sparar valda produkter i sessionen
+    public void SaveSelectedProducts(List<string> variantIds)
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        session?.SetString(SelectedKey, JsonSerializer.Serialize(variantIds));
+    }
+
+    // Hämtar valda produkter från sessionen
+    public List<string> GetSelectedProducts()
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        var json = session?.GetString(SelectedKey);
+        if (string.IsNullOrEmpty(json)) return new List<string>();
+        return JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+    }
 }

@@ -22,7 +22,12 @@ public class ReviewController : Controller
         if (products.Count == 0)
             return RedirectToAction("Index", "Upload");
 
+        var selectedVariantIds = _sessionStore.GetSelectedProducts();
+
         ViewBag.Prompt = _sessionStore.GetPrompt();
+        ViewBag.EligibleCount = products.Count(p =>
+            selectedVariantIds.Contains(p.VariantId ?? "") &&
+            p.DataQuality != ProductContentGenerator.Models.DataQuality.Insufficient);
 
         return View(products);
     }

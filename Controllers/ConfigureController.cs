@@ -9,13 +9,15 @@ public class ConfigureController : Controller
 {
     private readonly SessionStore _sessionStore;
     private readonly ClaudeService _claudeService;
+    private readonly BatchJobQueue _batchJobQueue;
 
-    private const string DefaultPrompt = "Du är en erfaren copywriter som skriver produktbeskrivningar för ett svenskt apotek. Skriv en SEO-optimerad produktbeskrivning på svenska baserad på produktdatan. Beskrivningen ska vara 150-200 ord, ha en engagerande inledning, innehålla relevanta nyckelord.";
+    private const string DefaultPrompt = "Du är en erfaren copywriter som skriver produktbeskrivningar för ett svenskt apotek. Skriv en SEO-optimerad produktbeskrivning på svenska baserad på produktdatan. Beskrivningen ska vara 150-200 ord, ha en engagerande inledning, innehålla relevanta nyckelord. Addera tre bullet points i slutet. Undvik rubriker, bara ren text och stycken där det är lämpligt.";
 
-    public ConfigureController(SessionStore sessionStore, ClaudeService claudeService)
+    public ConfigureController(SessionStore sessionStore, ClaudeService claudeService, BatchJobQueue batchJobQueue)
     {
         _sessionStore = sessionStore;
         _claudeService = claudeService;
+        _batchJobQueue = batchJobQueue;
     }
 
     public IActionResult Index()
@@ -25,7 +27,6 @@ public class ConfigureController : Controller
         if (products.Count == 0)
             return RedirectToAction("Index", "Upload");
 
-        // Hämta sparad prompt eller använd default
         ViewBag.Prompt = string.IsNullOrEmpty(_sessionStore.GetPrompt())
             ? DefaultPrompt
             : _sessionStore.GetPrompt();
@@ -33,7 +34,6 @@ public class ConfigureController : Controller
         return View(products);
     }
 
-    // Returnerar detaljvy för en produkt via AJAX
     [HttpGet]
     public IActionResult Detail(string variantId)
     {
@@ -47,22 +47,20 @@ public class ConfigureController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> RunSample(string prompt, int sampleCount)
+    public async Task<IActionResult> RunSample(string prompt, int sampleCount, List<string> selectedVariantIds)
     {
         var products = _sessionStore.GetProducts();
 
         if (products.Count == 0)
             return RedirectToAction("Index", "Upload");
 
-        // Spara prompten i sessionen
         _sessionStore.SavePrompt(prompt);
+        _sessionStore.SaveSelectedProducts(selectedVariantIds);
 
-        // Använd bara produkter med tillräcklig data
         var eligibleProducts = products
-            .Where(p => p.DataQuality != DataQuality.Insufficient)
+            .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != DataQuality.Insufficient)
             .ToList();
 
-        // Ta max sampleCount produkter, men aldrig fler än vad som finns
         var sampleProducts = eligibleProducts
             .Take(Math.Min(sampleCount, eligibleProducts.Count))
             .ToList();
@@ -73,7 +71,6 @@ public class ConfigureController : Controller
             return RedirectToAction("Index");
         }
 
-        // Generera beskrivningar för sample-produkterna
         foreach (var product in sampleProducts)
         {
             var result = await _claudeService.GenerateDescriptionAsync(product, prompt);
@@ -85,9 +82,60 @@ public class ConfigureController : Controller
             productInSession.GenerationFailed = !result.Success;
         }
 
-        // Spara uppdaterad produktlista i sessionen
         _sessionStore.SaveProducts(products);
 
         return RedirectToAction("Index", "Review");
+    }
+
+    [HttpPost]
+    public IActionResult RunAll(string prompt)
+    {
+        var products = _sessionStore.GetProducts();
+
+        if (products.Count == 0)
+            return RedirectToAction("Index", "Upload");
+
+        _sessionStore.SavePrompt(prompt);
+
+        var selectedVariantIds = _sessionStore.GetSelectedProducts();
+
+        var eligibleProducts = products
+            .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != DataQuality.Insufficient)
+            .ToList();
+
+        if (eligibleProducts.Count == 0)
+        {
+            TempData["Error"] = "No products with sufficient data found.";
+            return RedirectToAction("Index");
+        }
+
+        var job = new BatchJob
+        {
+            Products = eligibleProducts,
+            AllProducts = products,
+            Prompt = prompt,
+            Total = eligibleProducts.Count
+        };
+
+        _batchJobQueue.Enqueue(job);
+        Console.WriteLine($"Job enqueued with {job.Total} products");
+
+        return RedirectToAction("Progress");
+    }
+
+    public IActionResult Progress()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult GetProgress()
+    {
+        var job = _batchJobQueue.Peek();
+
+        if (job == null)
+            return Json(new { completed = 0, total = 0, done = false });
+
+        return Json(new { completed = job.Completed, total = job.Total, done = job.IsDone });
     }
 }

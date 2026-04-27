@@ -9,7 +9,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.IdleTimeout = TimeSpan.FromHours(8);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -19,6 +19,8 @@ builder.Services.AddScoped<ImportService>();
 builder.Services.AddScoped<ClassificationService>();
 builder.Services.AddHttpClient<ClaudeService>();
 builder.Services.AddScoped<SessionStore>();
+builder.Services.AddSingleton<BatchJobQueue>();
+builder.Services.AddHostedService<BatchJobService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

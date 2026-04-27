@@ -111,6 +111,7 @@ c!).Distinct().ToList();
     <!-- Höger panel -->
     <div class="configure-right">
         <form method="post" action="/Configure/RunSample" id="sampleForm">
+            <div id="selectedProductInputs"></div>
             <p class="prompt-label">AI Instructions</p>
             <textarea class="prompt-textarea" name="prompt">@ViewBag.Prompt</textarea>
             <p class="prompt-hint">Adjust prompt if needed</p>

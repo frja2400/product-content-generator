@@ -1,10 +1,11 @@
 @model List<ProductContentGenerator.Models.Product>
-@using Microsoft.AspNetCore.Html
+
 @{
     ViewData["Title"] = "Review";
     ViewData["Step"] = "3";
 
     var generatedProducts = Model.Where(p => p.GeneratedDescription != null).ToList();
+    var insufficientCount = Model.Count(p => p.DataQuality != ProductContentGenerator.Models.DataQuality.Insufficient);
 }
 
 <div class="review-layout">
@@ -13,6 +14,15 @@
     <div class="review-left">
         @foreach (var product in generatedProducts)
         {
+            var hasNoDescriptions = string.IsNullOrWhiteSpace(product.LongDescription) &&
+                                    string.IsNullOrWhiteSpace(product.ShortDescription) &&
+                                    string.IsNullOrWhiteSpace(product.ContentDescription) &&
+                                    string.IsNullOrWhiteSpace(product.UsageDescription) &&
+                                    string.IsNullOrWhiteSpace(product.FeatureBullets) &&
+                                    string.IsNullOrWhiteSpace(product.AffectingSubstances);
+
+            var isLimited = product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited;
+
             <div class="product-card">
                 <div class="product-card-header">
                     <div class="product-card-title">
@@ -24,7 +34,7 @@
 
                 <div class="card-generated">
                     <h4 class="card-section-label">Generated description</h4>
-                    <div class="card-text">@Html.Raw(RenderMarkdown(product.GeneratedDescription ?? ""))</div>
+                    <div class="card-text">@Html.Raw((product.GeneratedDescription ?? "").Replace("\n", "<br>"))</div>
                 </div>
 
                 @if (product.GenerationFailed)
@@ -33,7 +43,7 @@
                     <button class="btn-retry" data-variant-id="@product.VariantId">Try again</button>
                 }
 
-                @if (product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited)
+                @if (isLimited)
                 {
                     <p class="card-warning">Generated from limited data – review carefully.</p>
                 }
@@ -83,22 +93,12 @@
                                 <p>@product.AffectingSubstances</p>
                             </div>
                         }
-                        @if (string.IsNullOrWhiteSpace(product.LongDescription) &&
-                                                                                                             string.IsNullOrWhiteSpace(product.ShortDescription) &&
-                                                                                                             string.IsNullOrWhiteSpace(product.ContentDescription) &&
-                                                                                                             string.IsNullOrWhiteSpace(product.UsageDescription) &&
-                                                                                                             string.IsNullOrWhiteSpace(product.FeatureBullets) &&
-                                                                                                             string.IsNullOrWhiteSpace(product.AffectingSubstances))
+                        @if (hasNoDescriptions)
                         {
                             <p class="card-no-data">No original description available.</p>
                         }
                     </div>
                 </details>
-
-                @if (product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited)
-                {
-                    <p class="card-warning">Generated from limited data – review carefully.</p>
-                }
             </div>
         }
     </div>
@@ -117,47 +117,18 @@
 
         <div class="review-actions">
             <button type="submit" form="rerunForm" class="btn-sample">Run sample again</button>
-            <button class="btn-run-all" id="runAllBtn">Run all products (@Model.Count(p => p.DataQuality !=
-                                                ProductContentGenerator.Models.DataQuality.Insufficient))</button>
-                <div class="review-secondary-actions">
-                    <a href="/Configure" class="btn-text-link">Back to configure</a>
-                    <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
-                </div>
+            <form method="post" action="/Configure/RunAll" id="runAllForm">
+                <input type="hidden" name="prompt" id="runAllPrompt" />
+                <button type="submit" class="btn-run-all" id="runAllBtn"
+                        onclick="document.getElementById('runAllPrompt').value = document.querySelector('#rerunForm textarea[name=prompt]').value">
+                    Run all products (@ViewBag.EligibleCount)
+                </button>
+            </form>
+            <div class="review-secondary-actions">
+                <a href="/Configure" class="btn-text-link">Back to configure</a>
+                <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
             </div>
         </div>
+    </div>
 
-@functions {
-    string RenderMarkdown(string markdown)
-    {
-        if (string.IsNullOrEmpty(markdown)) return "";
-        
-        // Enkel markdown-rendering
-        var html = markdown
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;");
-
-        // Rubriker
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"^### (.+)$", "<h4>$1</h4>",
-System.Text.RegularExpressions.RegexOptions.Multiline);
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"^## (.+)$", "<h3>$1</h3>",
-System.Text.RegularExpressions.RegexOptions.Multiline);
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"^# (.+)$", "<h2>$1</h2>",
-System.Text.RegularExpressions.RegexOptions.Multiline);
-
-        // Fetstil
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
-
-        // Punktlistor
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"^- (.+)$", "<li>$1</li>",
-System.Text.RegularExpressions.RegexOptions.Multiline);
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"(<li>.*</li>)", "<ul>$1</ul>",
-System.Text.RegularExpressions.RegexOptions.Singleline);
-
-        // Radbrytningar
-        html = html.Replace("\n\n", "</p><p>").Replace("\n", "<br/>");
-        html = "<p>" + html + "</p>";
-
-        return html;
-    }
-}
+</div>
