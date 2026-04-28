@@ -31,6 +31,8 @@ public class ConfigureController : Controller
             ? DefaultPrompt
             : _sessionStore.GetPrompt();
 
+        ViewBag.SampleCount = _sessionStore.GetSampleCount();
+
         return View(products);
     }
 
@@ -56,6 +58,14 @@ public class ConfigureController : Controller
 
         _sessionStore.SavePrompt(prompt);
         _sessionStore.SaveSelectedProducts(selectedVariantIds);
+        _sessionStore.SaveSampleCount(sampleCount);
+
+        // Rensa gamla genererade beskrivningar innan ny körning
+        foreach (var product in products)
+        {
+            product.GeneratedDescription = null;
+            product.GenerationFailed = false;
+        }
 
         var eligibleProducts = products
             .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != DataQuality.Insufficient)
@@ -100,13 +110,15 @@ public class ConfigureController : Controller
         var selectedVariantIds = _sessionStore.GetSelectedProducts();
 
         var eligibleProducts = products
-            .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != DataQuality.Insufficient)
+            .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") &&
+                p.DataQuality != DataQuality.Insufficient &&
+                string.IsNullOrWhiteSpace(p.GeneratedDescription))
             .ToList();
 
         if (eligibleProducts.Count == 0)
         {
-            TempData["Error"] = "No products with sufficient data found.";
-            return RedirectToAction("Index");
+            // Alla produkter är redan genererade, gå direkt till export
+            return RedirectToAction("Index", "Export");
         }
 
         var job = new BatchJob

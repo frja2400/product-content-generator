@@ -23,7 +23,7 @@
 
             var isLimited = product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited;
 
-            <div class="product-card">
+            <div class="product-card" data-variant-id="@product.VariantId">
                 <div class="product-card-header">
                     <div class="product-card-title">
                         <h3 class="card-name">@product.DisplayName</h3>
@@ -109,18 +109,19 @@
             <p class="prompt-label">AI Instructions</p>
             <textarea class="prompt-textarea" name="prompt">@ViewBag.Prompt</textarea>
             <p class="prompt-hint">Adjust prompt if needed</p>
-            <div class="prompt-actions">
-                <input type="number" class="sample-input" name="sampleCount" value="3" min="3" max="10" />
-                <span class="sample-label">sample products</span>
-            </div>
         </form>
 
         <div class="review-actions">
-            <button type="submit" form="rerunForm" class="btn-sample">Run sample again</button>
+            <div class="prompt-actions">
+                <input type="number" class="sample-input" id="sampleCountRerun" value="@ViewBag.SampleCount" min="3"
+                       max="10" />
+                <span class="sample-label">sample products</span>
+            </div>
+            <button class="btn-sample" id="rerunSampleBtn">Run sample again</button>
             <form method="post" action="/Configure/RunAll" id="runAllForm">
                 <input type="hidden" name="prompt" id="runAllPrompt" />
                 <button type="submit" class="btn-run-all" id="runAllBtn"
-                        onclick="document.getElementById('runAllPrompt').value = document.querySelector('#rerunForm textarea[name=prompt]').value">
+                        onclick="document.getElementById('runAllPrompt').value = document.querySelector('.prompt-textarea').value">
                     Run all products (@ViewBag.EligibleCount)
                 </button>
             </form>

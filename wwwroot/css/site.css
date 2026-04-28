@@ -180,6 +180,13 @@ body {
     overflow-y: auto;
 }
 
+.configure-right-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 .prompt-label {
     font-size: 13px;
     font-weight: 600;
@@ -214,7 +221,6 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 15px;
 }
 
 .sample-input {
@@ -794,6 +800,9 @@ body {
     font-weight: 600;
     cursor: pointer;
     width: 100%;
+    text-decoration: none;
+    text-align: center;
+    display: block;
     margin-top: auto;
 }
 

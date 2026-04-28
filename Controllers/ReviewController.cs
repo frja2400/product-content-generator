@@ -24,6 +24,7 @@ public class ReviewController : Controller
 
         var selectedVariantIds = _sessionStore.GetSelectedProducts();
 
+        ViewBag.SampleCount = _sessionStore.GetSampleCount();
         ViewBag.Prompt = _sessionStore.GetPrompt();
         ViewBag.EligibleCount = products.Count(p =>
             selectedVariantIds.Contains(p.VariantId ?? "") &&
@@ -58,5 +59,70 @@ public class ReviewController : Controller
             generatedDescription = productInSession.GeneratedDescription,
             generationFailed = productInSession.GenerationFailed
         });
+    }
+
+    public class RunSampleAgainRequest
+    {
+        public string Prompt { get; set; } = "";
+        public int SampleCount { get; set; }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RunSampleAgain([FromBody] RunSampleAgainRequest request)
+    {
+        var products = _sessionStore.GetProducts();
+
+        if (products.Count == 0)
+            return Json(new { success = false, error = "No products in session" });
+
+        _sessionStore.SavePrompt(request.Prompt);
+        _sessionStore.SaveSampleCount(request.SampleCount);
+
+        // Rensa gamla genererade beskrivningar
+        foreach (var product in products)
+        {
+            product.GeneratedDescription = null;
+            product.GenerationFailed = false;
+        }
+
+        _sessionStore.SaveProducts(products);
+
+        var selectedVariantIds = _sessionStore.GetSelectedProducts();
+
+        var eligibleProducts = products
+            .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != ProductContentGenerator.Models.DataQuality.Insufficient)
+            .ToList();
+
+        var sampleProducts = eligibleProducts
+            .Take(Math.Min(request.SampleCount, eligibleProducts.Count))
+            .ToList();
+
+        if (sampleProducts.Count == 0)
+            return Json(new { success = false, error = "No eligible products found" });
+
+        var results = new List<object>();
+
+        foreach (var product in sampleProducts)
+        {
+            var result = await _claudeService.GenerateDescriptionAsync(product, request.Prompt);
+
+            var productInSession = products.First(p => p.VariantId == product.VariantId);
+            productInSession.GeneratedDescription = result.Success
+                ? result.GeneratedDescription
+                : product.LongDescription;
+            productInSession.GenerationFailed = !result.Success;
+
+            results.Add(new
+            {
+                variantId = product.VariantId,
+                displayName = product.DisplayName,
+                generatedDescription = productInSession.GeneratedDescription,
+                generationFailed = productInSession.GenerationFailed
+            });
+        }
+
+        _sessionStore.SaveProducts(products);
+
+        return Json(new { success = true, results });
     }
 }

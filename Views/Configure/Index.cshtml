@@ -115,11 +115,13 @@ c!).Distinct().ToList();
             <p class="prompt-label">AI Instructions</p>
             <textarea class="prompt-textarea" name="prompt">@ViewBag.Prompt</textarea>
             <p class="prompt-hint">Adjust prompt if needed</p>
-            <div class="prompt-actions">
-                <input type="number" class="sample-input" id="sampleCount" name="sampleCount" value="3" min="3"
-                       max="10" />
-                <button type="submit" class="btn-sample" id="sampleBtn">Run sample</button>
-            </div>
         </form>
-        <button class="btn-cancel cancel-import-btn">Cancel import</button>
+        <div class="configure-right-actions">
+            <div class="prompt-actions">
+                <input type="number" class="sample-input" id="sampleCount" name="sampleCount"
+                       value="@ViewBag.SampleCount" min="3" max="10" form="sampleForm" />
+                <button type="submit" class="btn-sample" id="sampleBtn" form="sampleForm">Run sample</button>
+            </div>
+            <button class="btn-cancel cancel-import-btn">Cancel import</button>
+        </div>
     </div>

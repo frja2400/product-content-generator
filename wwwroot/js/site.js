@@ -302,3 +302,53 @@ if (progressText && progressBar) {
         }
     }, 2000);
 }
+
+// Run sample again via AJAX
+const rerunSampleBtn = document.getElementById('rerunSampleBtn');
+if (rerunSampleBtn) {
+    rerunSampleBtn.addEventListener('click', async () => {
+        const prompt = document.querySelector('.prompt-textarea')?.value;
+        const sampleCount = document.getElementById('sampleCountRerun')?.value || 3;
+
+        rerunSampleBtn.disabled = true;
+        rerunSampleBtn.textContent = 'Generating...';
+
+        const response = await fetch('/Review/RunSampleAgain', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, sampleCount: parseInt(sampleCount) })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Rensa alla befintliga produktkort
+            const reviewLeft = document.querySelector('.review-left');
+            if (reviewLeft) reviewLeft.innerHTML = '';
+
+            // Lägg till nya produktkort
+            data.results.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.setAttribute('data-variant-id', result.variantId);
+                card.innerHTML = `
+            <div class="product-card-header">
+                <div class="product-card-title">
+                    <h3 class="card-name">${result.displayName}</h3>
+                    <span class="card-variant">${result.variantId}</span>
+                </div>
+            </div>
+            <div class="card-generated">
+                <h4 class="card-section-label">Generated description</h4>
+                <div class="card-text">${result.generatedDescription.replace(/\n/g, '<br>')}</div>
+            </div>
+            ${result.generationFailed ? '<p class="card-error">Generation failed – showing original text.</p>' : ''}
+        `;
+                reviewLeft.appendChild(card);
+            });
+        }
+
+        rerunSampleBtn.disabled = false;
+        rerunSampleBtn.textContent = 'Run sample again';
+    });
+}

@@ -95,4 +95,19 @@ public class SessionStore
         if (string.IsNullOrEmpty(json)) return new List<string>();
         return JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
     }
+
+    private const string SampleCountKey = "sampleCount";
+    // Sparar antal produkter att generera i sessionen
+    public void SaveSampleCount(int count)
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        session?.SetString(SampleCountKey, count.ToString());
+    }
+
+    public int GetSampleCount()
+    {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        var val = session?.GetString(SampleCountKey);
+        return int.TryParse(val, out int count) ? count : 3;
+    }
 }
