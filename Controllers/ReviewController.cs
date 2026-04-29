@@ -81,6 +81,7 @@ public class ReviewController : Controller
         // Rensa gamla genererade beskrivningar
         foreach (var product in products)
         {
+            product.PreviousGeneratedDescription = product.GeneratedDescription;
             product.GeneratedDescription = null;
             product.GenerationFailed = false;
         }
@@ -117,7 +118,9 @@ public class ReviewController : Controller
                 variantId = product.VariantId,
                 displayName = product.DisplayName,
                 generatedDescription = productInSession.GeneratedDescription,
-                generationFailed = productInSession.GenerationFailed
+                generationFailed = productInSession.GenerationFailed,
+                previousGeneratedDescription = productInSession.PreviousGeneratedDescription,
+                dataQuality = productInSession.DataQuality.ToString()
             });
         }
 

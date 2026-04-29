@@ -322,28 +322,41 @@ if (rerunSampleBtn) {
         const data = await response.json();
 
         if (data.success) {
-            // Rensa alla befintliga produktkort
             const reviewLeft = document.querySelector('.review-left');
             if (reviewLeft) reviewLeft.innerHTML = '';
 
-            // Lägg till nya produktkort
             data.results.forEach(result => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 card.setAttribute('data-variant-id', result.variantId);
+
+                const previousSection = result.previousGeneratedDescription
+                    ? `<details class="card-original">
+                        <summary>Previous generation</summary>
+                        <div class="card-original-content">
+                            <div class="original-field">
+                                <p>${result.previousGeneratedDescription.replace(/\n/g, '<br>')}</p>
+                            </div>
+                        </div>
+                       </details>`
+                    : '';
+
                 card.innerHTML = `
-            <div class="product-card-header">
-                <div class="product-card-title">
-                    <h3 class="card-name">${result.displayName}</h3>
-                    <span class="card-variant">${result.variantId}</span>
-                </div>
-            </div>
-            <div class="card-generated">
-                <h4 class="card-section-label">Generated description</h4>
-                <div class="card-text">${result.generatedDescription.replace(/\n/g, '<br>')}</div>
-            </div>
-            ${result.generationFailed ? '<p class="card-error">Generation failed – showing original text.</p>' : ''}
-        `;
+                    <div class="product-card-header">
+                        <div class="product-card-title">
+                            <h3 class="card-name">${result.displayName}</h3>
+                            <span class="card-variant">${result.variantId}</span>
+                        </div>
+                        <span class="quality-dot ${result.dataQuality.toLowerCase()}"></span>
+                    </div>
+                    <div class="card-generated">
+                        <h4 class="card-section-label">Generated description</h4>
+                        <div class="card-text">${result.generatedDescription.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    ${result.generationFailed ? '<p class="card-error">Generation failed – showing original text.</p>' : ''}
+                    ${previousSection}
+                `;
+
                 reviewLeft.appendChild(card);
             });
         }

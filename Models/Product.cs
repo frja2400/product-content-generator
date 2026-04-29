@@ -95,6 +95,7 @@ public class Product
 
     // Genererat innehåll
     public string? GeneratedDescription { get; set; }
+    public string? PreviousGeneratedDescription { get; set; }
 
     // Klassificering (internt, exporteras ej)
     public DataQuality DataQuality { get; set; }

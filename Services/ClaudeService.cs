@@ -46,10 +46,11 @@ public class ClaudeService
             {
                 model = _deploymentName,
                 max_tokens = MaxTokens,
+                system = prompt,
                 messages = new[]
-                {
-                    new { role = "user", content = fullPrompt }
-                }
+    {
+        new { role = "user", content = $"Product data:\n{productContext}" }
+    }
             };
 
             var json = JsonSerializer.Serialize(requestBody);

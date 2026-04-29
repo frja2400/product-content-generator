@@ -65,6 +65,7 @@ public class ConfigureController : Controller
         {
             product.GeneratedDescription = null;
             product.GenerationFailed = false;
+            product.PreviousGeneratedDescription = null;
         }
 
         var eligibleProducts = products
