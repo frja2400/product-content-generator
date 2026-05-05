@@ -105,7 +105,7 @@ public class ExportService
             {
                 if (!inList)
                 {
-                    sb.Append("<ul>");
+                    sb.Append("<ul style=\"margin-left:10px\">");
                     inList = true;
                 }
                 sb.Append($"<li>{trimmed.TrimStart('•', '-').Trim()}</li>");

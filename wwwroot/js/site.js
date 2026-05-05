@@ -303,6 +303,30 @@ if (progressText && progressBar) {
     }, 2000);
 }
 
+// Bygg HTML för originalfält i detaljvyn
+const buildOriginalFields = (result) => {
+    const categoryDisplay = [
+        result.category0, result.category1, result.category2, result.category3,
+        result.category4, result.category5, result.category6, result.category7,
+        result.category8, result.category9
+    ].filter(Boolean).join(' / ');
+
+    const fields = [
+        { label: 'Description', value: result.longDescription },
+        { label: 'Short description', value: result.shortDescription },
+        { label: 'Content', value: result.contentDescription },
+        { label: 'Usage', value: result.usageDescription },
+        { label: 'Features', value: result.featureBullets },
+        { label: 'Substances', value: result.affectingSubstances },
+        { label: 'Category', value: categoryDisplay }
+    ];
+
+    return fields
+        .filter(f => f.value)
+        .map(f => `<div class="original-field"><label>${f.label}</label><p>${f.value}</p></div>`)
+        .join('');
+};
+
 // Run sample again via AJAX
 const rerunSampleBtn = document.getElementById('rerunSampleBtn');
 if (rerunSampleBtn) {
@@ -339,7 +363,12 @@ if (rerunSampleBtn) {
                             </div>
                         </div>
                        </details>`
-                    : '';
+                    : `<details class="card-original">
+                        <summary>Original data</summary>
+                        <div class="card-original-content">
+                            ${buildOriginalFields(result)}
+                        </div>
+                       </details>`;
 
                 card.innerHTML = `
                     <div class="product-card-header">

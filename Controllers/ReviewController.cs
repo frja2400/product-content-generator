@@ -120,7 +120,23 @@ public class ReviewController : Controller
                 generatedDescription = productInSession.GeneratedDescription,
                 generationFailed = productInSession.GenerationFailed,
                 previousGeneratedDescription = productInSession.PreviousGeneratedDescription,
-                dataQuality = productInSession.DataQuality.ToString()
+                dataQuality = productInSession.DataQuality.ToString(),
+                longDescription = product.LongDescription,
+                shortDescription = product.ShortDescription,
+                contentDescription = product.ContentDescription,
+                usageDescription = product.UsageDescription,
+                featureBullets = product.FeatureBullets,
+                affectingSubstances = product.AffectingSubstances,
+                category0 = product.Category0,
+                category1 = product.Category1,
+                category2 = product.Category2,
+                category3 = product.Category3,
+                category4 = product.Category4,
+                category5 = product.Category5,
+                category6 = product.Category6,
+                category7 = product.Category7,
+                category8 = product.Category8,
+                category9 = product.Category9
             });
         }
 

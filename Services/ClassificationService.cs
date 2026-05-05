@@ -15,28 +15,29 @@ public class ClassificationService
 
     private DataQuality Classify(Product product)
     {
-        // Otillräcklig – saknar grundläggande identifieringsinformation
-        if (string.IsNullOrWhiteSpace(product.DisplayName) &&
-            string.IsNullOrWhiteSpace(product.Brand))
-        {
+        // Otillräcklig – saknar produktnamn eller alla beskrivningsfält
+        if (string.IsNullOrWhiteSpace(product.DisplayName))
             return DataQuality.Insufficient;
-        }
 
-        // Kontrollera om minst ett beskrivningsfält är ifyllt
-        bool hasDescriptionData =
+        bool hasRichDescription =
+            !string.IsNullOrWhiteSpace(product.LongDescription) ||
             !string.IsNullOrWhiteSpace(product.ContentDescription) ||
-            !string.IsNullOrWhiteSpace(product.UsageDescription) ||
             !string.IsNullOrWhiteSpace(product.FeatureBullets) ||
-            !string.IsNullOrWhiteSpace(product.AffectingSubstances) ||
-            !string.IsNullOrWhiteSpace(product.LongDescription);
+            !string.IsNullOrWhiteSpace(product.AffectingSubstances);
 
-        // Begränsad – har grundinfo men saknar beskrivningsdata
-        if (!hasDescriptionData)
-        {
+        bool hasThinDescription =
+            !string.IsNullOrWhiteSpace(product.ShortDescription) ||
+            !string.IsNullOrWhiteSpace(product.UsageDescription);
+
+        // Otillräcklig – har namn men absolut inget beskrivningsinnehåll
+        if (!hasRichDescription && !hasThinDescription)
+            return DataQuality.Insufficient;
+
+        // Begränsad – har namn men bara tunna beskrivningsfält
+        if (!hasRichDescription && hasThinDescription)
             return DataQuality.Limited;
-        }
 
-        // Fullständig – har både grundinfo och beskrivningsdata
+        // Fullständig – har namn och minst ett rikt beskrivningsfält
         return DataQuality.Full;
     }
 }

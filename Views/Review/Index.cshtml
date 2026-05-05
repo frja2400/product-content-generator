@@ -23,6 +23,12 @@
 
             var isLimited = product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited;
 
+            var categoryDisplay = string.Join(" / ", new[] {
+                product.Category0, product.Category1, product.Category2, product.Category3,
+                product.Category4, product.Category5, product.Category6, product.Category7,
+                product.Category8, product.Category9 }
+                .Where(c => !string.IsNullOrWhiteSpace(c)));
+
             <div class="product-card" data-variant-id="@product.VariantId">
                 <div class="product-card-header">
                     <div class="product-card-title">
@@ -67,7 +73,52 @@
                                     <p>@product.LongDescription</p>
                                 </div>
                             }
-                            @* ... resten av dina originalfält oförändrade ... *@
+                            @if (!string.IsNullOrWhiteSpace(product.ShortDescription))
+                            {
+                                <div class="original-field">
+                                    <label>Short description</label>
+                                    <p>@product.ShortDescription</p>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(product.ContentDescription))
+                            {
+                                <div class="original-field">
+                                    <label>Content</label>
+                                    <p>@product.ContentDescription</p>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(product.UsageDescription))
+                            {
+                                <div class="original-field">
+                                    <label>Usage</label>
+                                    <p>@product.UsageDescription</p>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(product.FeatureBullets))
+                            {
+                                <div class="original-field">
+                                    <label>Features</label>
+                                    <p>@product.FeatureBullets</p>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(product.AffectingSubstances))
+                            {
+                                <div class="original-field">
+                                    <label>Substances</label>
+                                    <p>@product.AffectingSubstances</p>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(categoryDisplay))
+                            {
+                                <div class="original-field">
+                                    <label>Category</label>
+                                    <p>@categoryDisplay</p>
+                                </div>
+                            }
+                            @if (hasNoDescriptions)
+                            {
+                                <p class="card-no-data">No original data available.</p>
+                            }
                         }
                     </div>
                 </details>

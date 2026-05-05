@@ -204,6 +204,7 @@ body {
     resize: vertical;
     font-family: 'Segoe UI', sans-serif;
     line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .prompt-textarea:focus {
