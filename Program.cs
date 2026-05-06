@@ -24,6 +24,7 @@ builder.Services.AddSingleton<BatchJobQueue>();
 builder.Services.AddHostedService<BatchJobService>();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 var app = builder.Build();
 
 app.UseStaticFiles();
