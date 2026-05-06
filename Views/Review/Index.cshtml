@@ -128,7 +128,7 @@
 
     <!-- Höger panel – prompt och åtgärder -->
     <div class="review-right">
-        <form method="post" action="/Configure/RunSample" id="rerunForm">
+        <form method="post" asp-controller="Configure" asp-action="RunSample" id="rerunForm">
             <p class="prompt-label">AI Instructions</p>
             <textarea class="prompt-textarea" name="prompt">@ViewBag.Prompt</textarea>
             <p class="prompt-hint">Adjust prompt if needed</p>
@@ -141,7 +141,7 @@
                 <span class="sample-label">sample products</span>
             </div>
             <button class="btn-sample" id="rerunSampleBtn">Run sample again</button>
-            <form method="post" action="/Configure/RunAll" id="runAllForm">
+            <form method="post" asp-controller="Configure" asp-action="RunAll" id="runAllForm">
                 <input type="hidden" name="prompt" id="runAllPrompt" />
                 <button type="submit" class="btn-run-all" id="runAllBtn"
                         onclick="document.getElementById('runAllPrompt').value = document.querySelector('.prompt-textarea').value">
@@ -149,7 +149,7 @@
                 </button>
             </form>
             <div class="review-secondary-actions">
-                <a href="/Configure" class="btn-text-link">Back to configure</a>
+                <a asp-controller="Configure" asp-action="Index" class="btn-text-link">Back to configure</a>
                 <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
             </div>
         </div>

@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.querySelectorAll('.cancel-import-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         if (confirm('Are you sure you want to cancel? All progress will be lost.')) {
-            window.location.href = '/Upload';
+            window.location.href = '/upload';
         }
     });
 });

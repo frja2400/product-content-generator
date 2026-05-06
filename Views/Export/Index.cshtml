@@ -87,9 +87,9 @@ p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
                     </div>
                 }
 
-                <a href="/Export/DownloadExcel" class="btn-export" id="exportBtn">Export to Excel</a>
+                <a asp-controller="Export" asp-action="DownloadExcel" class="btn-export" id="exportBtn">Export to Excel</a>
                 <div class="review-secondary-actions">
-                    <a href="/Review" class="btn-text-link">Back to review</a>
+                    <a asp-controller="Review" asp-action="Index" class="btn-text-link">Back to review</a>
                     <button class="btn-cancel btn-cancel-inline cancel-import-btn">Cancel import</button>
                 </div>
 

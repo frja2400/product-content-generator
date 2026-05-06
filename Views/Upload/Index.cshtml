@@ -11,7 +11,7 @@
         <p class="upload-error">@TempData["Error"]</p>
     }
 
-    <form method="post" action="/Upload/Upload" enctype="multipart/form-data" id="uploadForm">
+    <form method="post" asp-controller="Upload" asp-action="Upload" enctype="multipart/form-data" id="uploadForm">
         <div class="drop-zone" id="dropZone">
             <input type="file" name="file" id="fileInput" accept=".xlsx,.xml" hidden />
             <div class="drop-zone-content">
