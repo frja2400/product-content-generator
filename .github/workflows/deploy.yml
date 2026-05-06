@@ -26,6 +26,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "./publish/*"
           target: "/var/www/product-content-generator"
+          recursive: true
 
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
