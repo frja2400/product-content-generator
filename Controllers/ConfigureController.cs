@@ -132,7 +132,8 @@ public class ConfigureController : Controller
 
         if (eligibleProducts.Count == 0)
         {
-            // Alla produkter är redan genererade, gå direkt till export
+            // Alla produkter är redan genererade, rensa jobbet och gå direkt till export
+            _batchJobQueue.Clear();
             return RedirectToAction("Index", "Export");
         }
 
