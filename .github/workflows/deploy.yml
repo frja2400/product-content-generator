@@ -34,4 +34,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: sudo systemctl restart product-content-generator
+          script: |
+            cp -r /var/www/product-content-generator/publish/* /var/www/product-content-generator/
+            rm -rf /var/www/product-content-generator/publish
+            sudo systemctl restart product-content-generator
