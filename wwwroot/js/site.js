@@ -240,6 +240,26 @@ document.querySelectorAll('.cancel-import-btn').forEach(btn => {
     });
 });
 
+// Varna om prompt ändrats sedan senaste sample-körning
+const promptTextarea = document.querySelector('.prompt-textarea');
+const runAllBtn = document.getElementById('runAllBtn');
+let promptChanged = false;
+
+if (promptTextarea && runAllBtn) {
+    promptTextarea.addEventListener('input', () => {
+        promptChanged = true;
+    });
+
+    runAllBtn.addEventListener('click', (e) => {
+        if (promptChanged) {
+            alert('You have changed the prompt since the last sample run. Run a new sample before running all products.');
+            return;
+        }
+        document.getElementById('runAllPrompt').value = document.querySelector('.prompt-textarea').value;
+        document.getElementById('runAllForm').submit();
+    });
+}
+
 // Try again per produkt
 document.querySelectorAll('.btn-retry').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -374,6 +394,7 @@ const buildOriginalFields = (result) => {
 const rerunSampleBtn = document.getElementById('rerunSampleBtn');
 if (rerunSampleBtn) {
     rerunSampleBtn.addEventListener('click', async () => {
+        promptChanged = false; // återställ flaggan
         const prompt = document.querySelector('.prompt-textarea')?.value;
         const sampleCount = document.getElementById('sampleCountRerun')?.value || 3;
 

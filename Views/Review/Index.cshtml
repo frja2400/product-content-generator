@@ -143,8 +143,7 @@
             <button class="btn-sample" id="rerunSampleBtn">Run sample again</button>
             <form method="post" asp-controller="Configure" asp-action="RunAll" id="runAllForm">
                 <input type="hidden" name="prompt" id="runAllPrompt" />
-                <button type="submit" class="btn-run-all" id="runAllBtn"
-                        onclick="document.getElementById('runAllPrompt').value = document.querySelector('.prompt-textarea').value">
+                <button type="button" class="btn-run-all" id="runAllBtn">
                     Run all products (@ViewBag.EligibleCount)
                 </button>
             </form>
