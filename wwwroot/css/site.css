@@ -90,13 +90,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: default;
     transition: border-color 0.2s;
 }
 
 .drop-zone:hover,
 .drop-zone.drag-over {
     border-color: var(--color-primary);
+}
+
+.drop-zone.drag-over {
+    cursor: copy;
 }
 
 .drop-zone-content {
