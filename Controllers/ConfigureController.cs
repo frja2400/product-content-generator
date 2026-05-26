@@ -162,8 +162,8 @@ public class ConfigureController : Controller
         var job = _batchJobQueue.Peek();
 
         if (job == null)
-            return Json(new { completed = 0, total = 0, done = false });
+            return Json(new { completed = 0, total = 0, done = false, status = (string?)null });
 
-        return Json(new { completed = job.Completed, total = job.Total, done = job.IsDone });
+        return Json(new { completed = job.Completed, total = job.Total, done = job.IsDone, status = job.Status });
     }
 }

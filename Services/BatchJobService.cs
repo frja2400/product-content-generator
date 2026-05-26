@@ -25,12 +25,18 @@ public class BatchJobService : BackgroundService
                 Console.WriteLine($"Starting batch job with {job.Total} products");
                 job.IsRunning = true;
 
+                var statusProgress = new Progress<string>(msg =>
+                {
+                    job.Status = msg;
+                    Console.WriteLine(msg);
+                });
+
                 for (int i = 0; i < job.Products.Count; i++)
                 {
                     if (stoppingToken.IsCancellationRequested) break;
 
                     var product = job.Products[i];
-                    var result = await _claudeService.GenerateDescriptionAsync(product, job.Prompt);
+                    var result = await _claudeService.GenerateDescriptionAsync(product, job.Prompt, statusProgress, stoppingToken);
 
                     var productInAll = job.AllProducts.FirstOrDefault(p => p.VariantId == product.VariantId);
                     if (productInAll != null)
@@ -42,11 +48,13 @@ public class BatchJobService : BackgroundService
                     }
 
                     job.Completed = i + 1;
+                    job.Status = $"Genererar produkt {job.Completed} av {job.Total}...";
                     Console.WriteLine($"Completed {job.Completed} of {job.Total}");
                 }
 
                 job.IsRunning = false;
                 job.IsDone = true;
+                job.Status = null;
 
                 using var scope = _scopeFactory.CreateScope();
                 var sessionStore = scope.ServiceProvider.GetRequiredService<ProductContentGenerator.Data.SessionStore>();

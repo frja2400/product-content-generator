@@ -23,7 +23,7 @@ public class ClaudeService
         _deploymentName = configuration["Claude:DeploymentName"] ?? throw new InvalidOperationException("Claude deployment name not configured");
     }
 
-    public async Task<GenerationResult> GenerateDescriptionAsync(Product product, string prompt)
+    public async Task<GenerationResult> GenerateDescriptionAsync(Product product, string prompt, IProgress<string>? status = null, CancellationToken cancellationToken = default)
     {
         // Skippa produkter med otillräcklig data
         if (product.DataQuality == DataQuality.Insufficient)
@@ -36,11 +36,9 @@ public class ClaudeService
                 UsedFallback = false
             };
         }
-
         try
         {
             var productContext = BuildProductContext(product);
-            var fullPrompt = $"{prompt}\n\nProduct data:\n{productContext}";
 
             var requestBody = new
             {
@@ -48,48 +46,66 @@ public class ClaudeService
                 max_tokens = MaxTokens,
                 system = prompt,
                 messages = new[]
-    {
-        new { role = "user", content = $"Product data:\n{productContext}" }
-    }
+                {
+                    new { role = "user", content = $"Product data:\n{productContext}" }
+                }
             };
 
             var json = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, _endpoint);
-            request.Headers.Add("x-api-key", _apiKey);
-            request.Headers.Add("anthropic-version", "2023-06-01");
-            request.Content = content;
-
-            var response = await _httpClient.SendAsync(request);
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var request = new HttpRequestMessage(HttpMethod.Post, _endpoint);
+                request.Headers.Add("x-api-key", _apiKey);
+                request.Headers.Add("anthropic-version", "2023-06-01");
+                request.Content = content;
+
+                var response = await _httpClient.SendAsync(request, cancellationToken);
+
+                // Hantera rate limit – vänta och försök igen
+                if ((int)response.StatusCode == 429)
+                {
+                    var retryAfter = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromMinutes(1);
+                    var minutes = (int)retryAfter.TotalMinutes;
+                    var seconds = retryAfter.Seconds;
+                    status?.Report($"API-gränsen nådd – återupptar om {minutes} min {seconds} sek...");
+                    await Task.Delay(retryAfter, cancellationToken);
+                    status?.Report("");
+                    continue;
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new GenerationResult
+                    {
+                        VariantId = product.VariantId,
+                        Success = false,
+                        ErrorMessage = $"API error: {response.StatusCode} – {responseBody}",
+                        UsedFallback = true,
+                        GeneratedDescription = product.LongDescription
+                    };
+                }
+
+                var responseJson = JsonDocument.Parse(responseBody);
+                var generatedText = responseJson
+                    .RootElement
+                    .GetProperty("content")[0]
+                    .GetProperty("text")
+                    .GetString();
+
                 return new GenerationResult
                 {
                     VariantId = product.VariantId,
-                    Success = false,
-                    ErrorMessage = $"API error: {response.StatusCode} – {responseBody}",
-                    UsedFallback = true,
-                    GeneratedDescription = product.LongDescription
+                    GeneratedDescription = generatedText,
+                    Success = true,
+                    UsedFallback = false
                 };
             }
-
-            var responseJson = JsonDocument.Parse(responseBody);
-            var generatedText = responseJson
-                .RootElement
-                .GetProperty("content")[0]
-                .GetProperty("text")
-                .GetString();
-
-            return new GenerationResult
-            {
-                VariantId = product.VariantId,
-                GeneratedDescription = generatedText,
-                Success = true,
-                UsedFallback = false
-            };
         }
         catch (Exception ex)
         {

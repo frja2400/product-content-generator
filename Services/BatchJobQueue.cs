@@ -53,4 +53,5 @@ public class BatchJob
     public bool IsRunning { get; set; }
     public bool IsDone { get; set; }
     public bool ResultSaved { get; set; }
+    public string? Status { get; set; }
 }

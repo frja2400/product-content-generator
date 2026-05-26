@@ -284,6 +284,8 @@ function loadExportDetail(variantId, item) {
 // Progress polling
 const progressText = document.getElementById('progressText');
 const progressBar = document.getElementById('progressBar');
+const progressStatus = document.getElementById('progressStatus');
+let countdownInterval = null;
 
 if (progressText && progressBar) {
     const poll = setInterval(async () => {
@@ -296,8 +298,49 @@ if (progressText && progressBar) {
             progressBar.style.width = `${percent}%`;
         }
 
+        if (data.status && data.status.length > 0 && progressStatus) {
+
+            if (progressStatus.dataset.currentStatus !== data.status) {
+                progressStatus.dataset.currentStatus = data.status;
+
+                const match = data.status.match(/(\d+) min (\d+) sek/);
+                if (match) {
+                    let totalSeconds = parseInt(match[1]) * 60 + parseInt(match[2]);
+
+                    if (countdownInterval) clearInterval(countdownInterval);
+
+                    countdownInterval = setInterval(() => {
+                        totalSeconds--;
+                        if (totalSeconds <= 0) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                            if (progressStatus) {
+                                progressStatus.textContent = '';
+                                progressStatus.dataset.currentStatus = '';
+                            }
+                        } else {
+                            const m = Math.floor(totalSeconds / 60);
+                            const s = totalSeconds % 60;
+                            if (progressStatus) progressStatus.textContent =
+                                `API-gränsen nådd – återupptar om ${m} min ${s} sek...`;
+                        }
+                    }, 1000);
+                }
+            }
+        } else {
+            if (progressStatus) {
+                progressStatus.textContent = '';
+                progressStatus.dataset.currentStatus = '';
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
         if (data.done) {
             clearInterval(poll);
+            if (countdownInterval) clearInterval(countdownInterval);
             window.location.href = '/Export';
         }
     }, 2000);
