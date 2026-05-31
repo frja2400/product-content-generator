@@ -94,9 +94,32 @@ public class ReviewController : Controller
             .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != ProductContentGenerator.Models.DataQuality.Insufficient)
             .ToList();
 
-        var sampleProducts = eligibleProducts
-            .Take(Math.Min(request.SampleCount, eligibleProducts.Count))
+        var fullProducts = eligibleProducts
+            .Where(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Full)
             .ToList();
+
+        var limitedProducts = eligibleProducts
+            .Where(p => p.DataQuality == ProductContentGenerator.Models.DataQuality.Limited)
+            .ToList();
+
+        var sampleProducts = new List<ProductContentGenerator.Models.Product>();
+
+        // Lägg till en limited-produkt om det finns någon
+        if (limitedProducts.Count > 0)
+        {
+            sampleProducts.Add(limitedProducts.First());
+        }
+
+        // Fyll resten med full-produkter
+        var remaining = Math.Min(request.SampleCount - sampleProducts.Count, fullProducts.Count);
+        sampleProducts.AddRange(fullProducts.Take(remaining));
+
+        // Om vi inte nått sampleCount, fyll på med fler limited
+        if (sampleProducts.Count < request.SampleCount)
+        {
+            var extraLimited = limitedProducts.Skip(1).Take(request.SampleCount - sampleProducts.Count);
+            sampleProducts.AddRange(extraLimited);
+        }
 
         if (sampleProducts.Count == 0)
             return Json(new { success = false, error = "No eligible products found" });

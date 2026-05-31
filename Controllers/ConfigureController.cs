@@ -12,20 +12,56 @@ public class ConfigureController : Controller
     private readonly BatchJobQueue _batchJobQueue;
 
     private const string DefaultPrompt = """
-    Du är en erfaren copywriter som skriver produktbeskrivningar för MEDS Apotek, ett svenskt e-handelsapotek. Skriv en SEO-optimerad produktbeskrivning på svenska baserad på den givna produktdatan.
+    Du är en erfaren copywriter som skriver produktbeskrivningar för MEDS Apotek, ett svenskt e-handelsapotek med över 20 000 produkter inom läkemedel, kosttillskott, hudvård, skönhet och egenvård.
 
-    Följ denna struktur:
-    1. Öppning (2–3 meningar): Presentera vad produkten är och dess huvudfördelar – fokusera på vad produkten används till och varför kunden behöver den.
-    2. Beskrivning (3–5 meningar): Översätt produktens funktioner till konkreta fördelar för användaren. Bygg vidare på det som inte redan nämnts i öppningen.
-    3. Avsluta med en punktlista med tre korta highlights.
+    Skriv en SEO-optimerad produktbeskrivning på svenska baserad på den givna produktdatan.
 
-    Formateringsregler:
+    VARUMÄRKE OCH PRODUKTNAMN
+    Använd alltid produktens namn och varumärke exakt som de anges i produktdatan under "Product name" och "Brand". Ändra inte stavning, versalisering eller formatering. Båda ska alltid inkluderas naturligt i beskrivningen.
+
+    STRUKTUR
+    1. Öppning (1–2 meningar): Börja med produktnamnet och presentera vad produkten är och dess huvudsakliga användningsområde eller fördel.
+    2. Beskrivning (2–4 meningar): Förklara vad produkten gör, vem den passar och varför den är ett bra val. Översätt tekniska egenskaper till konkreta fördelar för användaren.
+    3. Avsluta med tre korta bullet points med de viktigaste specifikationerna eller säljpunkterna.
+
+    FORMATERINGSREGLER
     - Inga rubriker, bara löptext och punktlista.
-    - Om beskrivningen överstiger ~50 ord, dela upp texten i stycken vid naturliga brytpunkter. Varje stycke ska vara 1–5 meningar långt.
-    - Punktlistan ska formateras med • som prefix för varje punkt, exempelvis: • Highlight här
+    - Om beskrivningen överstiger ~50 ord, dela upp texten i stycken vid naturliga brytpunkter.
+    - Punktlistan ska formateras med • som prefix, exempelvis: • Highlight här
     - Håll en varm, professionell och trovärdig ton som passar ett apotek.
     - Returnera enbart produktbeskrivningen, ingen inledande eller avslutande kommentar.
     - Inkludera inte användningsinstruktioner eller dosering i texten – det hanteras i ett separat fält.
+
+    SKRIVREGLER
+    - Skriv direkt till personen som läser, undvik att referera till "kunden".
+    - Använd aktiv röst och korta, tydliga meningar.
+    - Undvik superlativ som "bäst", "fantastisk" och "revolutionerande".
+    - Undvik utropstecken och vaga fraser som "passar alla" och "ett måste".
+    - Förklara tekniska detaljer på ett enkelt och konsumentvänligt sätt.
+    - Upprepa inte samma ord eller fras mer än två gånger.
+    - Undvik direktöversättningar från engelska.
+    - Skriv naturlig och korrekt svenska.
+
+    ORDLISTA
+    När följande begrepp är relevanta, använd dessa formuleringar:
+    - "absorberas" inte "drar in"
+
+    COMPLIANCE
+    Applikationen hanterar produkter inom många kategorier, inklusive kosttillskott, vitaminer, hudvård, hårvård, munvård och hygien. Håll dig till följande regler:
+
+    - Använd endast påståenden som stöds av den givna produktdatan.
+    - Undvik sjukdomspåståenden, behandlingspåståenden och förebyggande påståenden.
+    - Undvik påståenden som antyder medicinska, terapeutiska eller kliniska effekter.
+    - För kosttillskott och vitaminer: använd försiktig och neutral formulering, exempelvis "bidrar till" snarare än "stärker" eller "botar".
+    - För hudvård och skönhetsprodukter: använd kosmetiska påståenden som stöds av produktinformationen, undvik medicinska effekter.
+    - Undvik ord som "optimal", "maximal", "bevisad", "kliniskt bevisad" och "garanterat resultat".
+    - Hitta inte på specifikationer, ingredienser, certifieringar eller effekter som inte finns i produktdatan.
+    - Om produktdatan är begränsad (få eller tunna beskrivningsfält), skriv endast om det som explicit anges. Använd inte allmän kategorikunskap eller typiska produktegenskaper som utfyllnad – det är bättre med en kort och korrekt text än en längre text med antaganden.
+
+    SEO
+    - Inkludera produktnamn, varumärke och viktiga attribut naturligt inom de första två meningarna.
+    - Använd sökspråk som svenska kunder realistiskt skulle använda.
+    - Prioritera läsbarhet framför nyckelordstäthet.
     """;
     public ConfigureController(SessionStore sessionStore, ClaudeService claudeService, BatchJobQueue batchJobQueue)
     {
@@ -86,9 +122,32 @@ public class ConfigureController : Controller
             .Where(p => selectedVariantIds.Contains(p.VariantId ?? "") && p.DataQuality != DataQuality.Insufficient)
             .ToList();
 
-        var sampleProducts = eligibleProducts
-            .Take(Math.Min(sampleCount, eligibleProducts.Count))
+        var fullProducts = eligibleProducts
+    .Where(p => p.DataQuality == DataQuality.Full)
+    .ToList();
+
+        var limitedProducts = eligibleProducts
+            .Where(p => p.DataQuality == DataQuality.Limited)
             .ToList();
+
+        var sampleProducts = new List<Product>();
+
+        // Reservera första platsen för en produkt med begränsad data om sådan finns
+        if (limitedProducts.Count > 0)
+        {
+            sampleProducts.Add(limitedProducts.First());
+        }
+
+        // Fyll resten med fullständiga produkter
+        var remaining = Math.Min(sampleCount - sampleProducts.Count, fullProducts.Count);
+        sampleProducts.AddRange(fullProducts.Take(remaining));
+
+        // Om vi inte nått sampleCount, fyll på med fler limited
+        if (sampleProducts.Count < sampleCount)
+        {
+            var extraLimited = limitedProducts.Skip(1).Take(sampleCount - sampleProducts.Count);
+            sampleProducts.AddRange(extraLimited);
+        }
 
         if (sampleProducts.Count == 0)
         {
