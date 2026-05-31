@@ -114,7 +114,12 @@ c!).Distinct().ToList();
             <div id="selectedProductInputs"></div>
             <p class="prompt-label">AI Instructions</p>
             <textarea class="prompt-textarea" name="prompt">@ViewBag.Prompt</textarea>
-            <p class="prompt-hint">Adjust prompt if needed</p>
+            <div class="prompt-footer">
+                <p class="prompt-hint">Adjust prompt if needed</p>
+                <button type="button" id="resetPromptBtn" class="btn-reset-prompt" title="Reset to default prompt">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
         </form>
         <div class="configure-right-actions">
             <div class="prompt-actions">

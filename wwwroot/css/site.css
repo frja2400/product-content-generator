@@ -229,6 +229,35 @@ body {
     gap: 12px;
 }
 
+.prompt-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+.prompt-footer .prompt-hint {
+    margin: 0;
+}
+
+.btn-reset-prompt {
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-reset-prompt:hover {
+    color: var(--color-primary);
+    background: none;
+}
+
 .sample-input {
     width: 60px;
     padding: 8px 10px;

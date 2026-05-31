@@ -98,6 +98,24 @@ public class ConfigureController : Controller
         return PartialView("_ProductDetail", product);
     }
 
+    [HttpGet]
+    public IActionResult GetDefaultPrompt()
+    {
+        return Content(DefaultPrompt);
+    }
+
+    [HttpPost]
+    public IActionResult SavePrompt([FromBody] SavePromptRequest request)
+    {
+        _sessionStore.SavePrompt(request.Prompt);
+        return Ok();
+    }
+
+    public class SavePromptRequest
+    {
+        public string Prompt { get; set; } = "";
+    }
+
     [HttpPost]
     public async Task<IActionResult> RunSample(string prompt, int sampleCount, List<string> selectedVariantIds)
     {

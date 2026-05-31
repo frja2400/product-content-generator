@@ -240,6 +240,27 @@ document.querySelectorAll('.cancel-import-btn').forEach(btn => {
     });
 });
 
+// Reset prompt to default
+const resetPromptBtn = document.getElementById('resetPromptBtn');
+if (resetPromptBtn) {
+    resetPromptBtn.addEventListener('click', () => {
+        const textarea = document.querySelector('.prompt-textarea');
+        if (textarea && confirm('Reset prompt to default?')) {
+            fetch('/Configure/GetDefaultPrompt')
+                .then(res => res.text())
+                .then(defaultPrompt => {
+                    textarea.value = defaultPrompt;
+                    promptChanged = true;
+                    fetch('/Configure/SavePrompt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: defaultPrompt })
+                    });
+                });
+        }
+    });
+}
+
 // Varna om prompt ändrats sedan senaste sample-körning
 const promptTextarea = document.querySelector('.prompt-textarea');
 const runAllBtn = document.getElementById('runAllBtn');
