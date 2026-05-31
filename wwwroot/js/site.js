@@ -79,6 +79,9 @@ function updateSampleButton() {
     sampleBtn.style.cursor = checkedCount === 0 ? 'not-allowed' : 'pointer';
 }
 
+// Flagga för att spåra om prompten ändrats sedan senaste sample-körning
+let promptChanged = false;
+
 // Configure - filter, checkbox och sortering
 document.addEventListener('DOMContentLoaded', () => {
     const brandFilter = document.getElementById('brandFilter');
@@ -226,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sampleBtn = document.getElementById('sampleBtn');
         if (sampleBtn) {
             sampleBtn.disabled = true;
-            sampleBtn.textContent = 'Generating...';
+            sampleBtn.innerHTML = '<div class="progress-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;margin-bottom:2px;"></div>Generating...';
         }
     });
 });
@@ -264,7 +267,6 @@ if (resetPromptBtn) {
 // Varna om prompt ändrats sedan senaste sample-körning
 const promptTextarea = document.querySelector('.prompt-textarea');
 const runAllBtn = document.getElementById('runAllBtn');
-let promptChanged = false;
 
 if (promptTextarea && runAllBtn) {
     promptTextarea.addEventListener('input', () => {
@@ -282,32 +284,33 @@ if (promptTextarea && runAllBtn) {
 }
 
 // Try again per produkt
-document.querySelectorAll('.btn-retry').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        const variantId = btn.dataset.variantId;
-        btn.textContent = 'Generating...';
-        btn.disabled = true;
+document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-retry');
+    if (!btn) return;
 
-        const response = await fetch(`/Review/RetryGeneration?variantId=${encodeURIComponent(variantId)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
+    const variantId = btn.dataset.variantId;
+    btn.textContent = 'Generating...';
+    btn.disabled = true;
 
-        const result = await response.json();
-        const card = btn.closest('.product-card');
-
-        const cardText = card.querySelector('.card-text');
-        if (cardText) cardText.innerHTML = result.generatedDescription.replace(/\n/g, '<br>');
-
-        if (result.success) {
-            const errorMsg = card.querySelector('.card-error');
-            if (errorMsg) errorMsg.remove();
-            btn.remove();
-        } else {
-            btn.textContent = 'Try again';
-            btn.disabled = false;
-        }
+    const response = await fetch(`/Review/RetryGeneration?variantId=${encodeURIComponent(variantId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
     });
+
+    const result = await response.json();
+    const card = btn.closest('.product-card');
+
+    const cardText = card.querySelector('.card-text');
+    if (cardText) cardText.innerHTML = result.generatedDescription.replace(/\n/g, '<br>');
+
+    if (result.success) {
+        const errorMsg = card.querySelector('.card-error');
+        if (errorMsg) errorMsg.remove();
+        btn.remove();
+    } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+    }
 });
 
 // Export - ladda produktdetalj
@@ -420,7 +423,7 @@ if (rerunSampleBtn) {
         const sampleCount = document.getElementById('sampleCountRerun')?.value || 3;
 
         rerunSampleBtn.disabled = true;
-        rerunSampleBtn.textContent = 'Generating...';
+        rerunSampleBtn.innerHTML = '<div class="progress-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;margin-bottom:2px;"></div>Generating...';
 
         const response = await fetch('/Review/RunSampleAgain', {
             method: 'POST',
@@ -456,19 +459,20 @@ if (rerunSampleBtn) {
                        </details>`;
 
                 card.innerHTML = `
-                    <div class="product-card-header">
-                        <div class="product-card-title">
-                            <h3 class="card-name">${result.displayName}</h3>
-                            <span class="card-variant">${result.variantId}</span>
-                        </div>
-                        <span class="quality-dot ${result.dataQuality.toLowerCase()}"></span>
-                    </div>
-                    <div class="card-generated">
-                        <h4 class="card-section-label">Generated description</h4>
-                        <div class="card-text">${result.generatedDescription.replace(/\n/g, '<br>')}</div>
-                    </div>
-                    ${result.generationFailed ? '<p class="card-error">Generation failed – showing original text.</p>' : ''}
-                    ${previousSection}
+                <div class="product-card-header">
+                <div class="product-card-title">
+                    <h3 class="card-name">${result.displayName}</h3>
+                    <span class="card-variant">${result.variantId}</span>
+                </div>
+                <span class="quality-dot ${result.dataQuality.toLowerCase()}"></span>
+                </div>
+                <div class="card-generated">
+                    <h4 class="card-section-label">Generated description</h4>
+                <div class="card-text">${result.generatedDescription.replace(/\n/g, '<br>')}</div>
+                </div>
+                ${result.generationFailed ? `<p class="card-error">Generation failed – showing original text.</p><button class="btn-retry" data-variant-id="${result.variantId}">Try again</button>` : ''}
+                ${result.dataQuality.toLowerCase() === 'limited' ? '<p class="card-warning">Generated from limited data – review carefully.</p>' : ''}
+                ${previousSection}
                 `;
 
                 reviewLeft.appendChild(card);
