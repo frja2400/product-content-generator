@@ -29,13 +29,13 @@ p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
             <h2 class="configure-title">Generated products <span class="configure-count">(@exportProducts.Count)</span>
             </h2>
             <div class="quality-summary">
-                <span class="quality-badge">
+                <span class="quality-badge" onclick="sortExportByQuality('full')">
                     <span class="quality-dot full"></span> Full (@fullCount)
                 </span>
-                <span class="quality-badge">
+                <span class="quality-badge" onclick="sortExportByQuality('limited')">
                     <span class="quality-dot limited"></span> Limited (@limitedCount)
                 </span>
-                <span class="quality-badge">
+                <span class="quality-badge" onclick="sortExportByQuality('original')">
                     <span class="quality-dot original"></span> Original (@originalCount)
                 </span>
             </div>
@@ -48,7 +48,7 @@ p.DataQuality == ProductContentGenerator.Models.DataQuality.Full);
             "original" :
                product.DataQuality == ProductContentGenerator.Models.DataQuality.Limited ? "limited" : "full";
 
-                <div class="product-item" data-variant-id="@product.VariantId"
+                <div class="product-item" data-variant-id="@product.VariantId" data-quality="@dotClass"
                      onclick="loadExportDetail('@product.VariantId', this)">
                     <div class="product-info">
                         <span class="product-name">@product.DisplayName</span>

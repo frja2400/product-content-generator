@@ -159,22 +159,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!categoryFilter) return;
 
         const categoryKey = categoryFilter.dataset.categoryKey || 'category0';
-        const currentValue = categoryFilter.value;
 
-        const visibleCategories = new Set();
+        const availableCategories = new Set();
         productItems.forEach(item => {
-            if (item.style.display !== 'none') {
+            const itemBrand = item.dataset.brand || '';
+            const brandMatch = activeFilters.brands.length === 0 || activeFilters.brands.includes(itemBrand);
+
+            if (brandMatch) {
                 const cat = item.dataset[categoryKey];
-                if (cat) visibleCategories.add(cat);
+                if (cat) availableCategories.add(cat);
             }
         });
 
         const options = categoryFilter.querySelectorAll('option:not([value=""])');
         options.forEach(option => {
-            option.style.display = visibleCategories.has(option.value) ? '' : 'none';
+            option.style.display = availableCategories.has(option.value) ? '' : 'none';
         });
 
-        if (!visibleCategories.has(currentValue)) {
+        if (!availableCategories.has(categoryFilter.value)) {
             categoryFilter.value = '';
         }
     }
@@ -323,6 +325,22 @@ function loadExportDetail(variantId, item) {
         .then(html => {
             document.getElementById('exportDetailPanel').innerHTML = html;
         });
+}
+
+// Sortera exportlista efter datakvalitet
+function sortExportByQuality(quality) {
+    const list = document.querySelector('.export-left .product-list');
+    if (!list) return;
+
+    const items = Array.from(list.querySelectorAll('.product-item'));
+
+    items.sort((a, b) => {
+        const aMatch = a.dataset.quality?.toLowerCase() === quality ? -1 : 1;
+        const bMatch = b.dataset.quality?.toLowerCase() === quality ? -1 : 1;
+        return aMatch - bMatch;
+    });
+
+    items.forEach(item => list.appendChild(item));
 }
 
 // Progress polling
