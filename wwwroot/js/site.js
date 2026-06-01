@@ -80,7 +80,7 @@ function updateSampleButton() {
 }
 
 // Flagga för att spåra om prompten ändrats sedan senaste sample-körning
-let promptChanged = false;
+let lastRunPrompt = null;
 
 // Configure - filter, checkbox och sortering
 document.addEventListener('DOMContentLoaded', () => {
@@ -255,7 +255,6 @@ if (resetPromptBtn) {
                 .then(res => res.text())
                 .then(defaultPrompt => {
                     textarea.value = defaultPrompt;
-                    promptChanged = true;
                     fetch('/Configure/SavePrompt', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -271,16 +270,15 @@ const promptTextarea = document.querySelector('.prompt-textarea');
 const runAllBtn = document.getElementById('runAllBtn');
 
 if (promptTextarea && runAllBtn) {
-    promptTextarea.addEventListener('input', () => {
-        promptChanged = true;
-    });
+    lastRunPrompt = promptTextarea.value;
 
     runAllBtn.addEventListener('click', (e) => {
-        if (promptChanged) {
+        const currentPrompt = document.querySelector('.prompt-textarea').value;
+        if (currentPrompt !== lastRunPrompt) {
             alert('You have changed the prompt since the last sample run. Run a new sample before running all products.');
             return;
         }
-        document.getElementById('runAllPrompt').value = document.querySelector('.prompt-textarea').value;
+        document.getElementById('runAllPrompt').value = currentPrompt;
         document.getElementById('runAllForm').submit();
     });
 }
@@ -436,8 +434,8 @@ const buildOriginalFields = (result) => {
 const rerunSampleBtn = document.getElementById('rerunSampleBtn');
 if (rerunSampleBtn) {
     rerunSampleBtn.addEventListener('click', async () => {
-        promptChanged = false; // återställ flaggan
         const prompt = document.querySelector('.prompt-textarea')?.value;
+        lastRunPrompt = prompt;
         const sampleCount = document.getElementById('sampleCountRerun')?.value || 3;
 
         rerunSampleBtn.disabled = true;
