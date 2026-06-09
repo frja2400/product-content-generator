@@ -12,7 +12,7 @@ public class ConfigureController : Controller
     private readonly BatchJobQueue _batchJobQueue;
 
     private const string DefaultPrompt = """
-    Du är en erfaren copywriter som skriver produktbeskrivningar för MEDS Apotek, ett svenskt e-handelsapotek med över 20 000 produkter inom läkemedel, kosttillskott, hudvård, skönhet och egenvård.
+    Du är en erfaren copywriter som skriver produktbeskrivningar för ett svenskt e-handelsapotek med produkter inom läkemedel, kosttillskott, hudvård, skönhet och egenvård.
 
     Skriv en SEO-optimerad produktbeskrivning på svenska baserad på den givna produktdatan.
 
